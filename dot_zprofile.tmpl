@@ -1,0 +1,12 @@
+# ~{{ .chezmoi.pathSeparator }}.zprofile
+
+# Home-local {{ .chezmoi.version.builtBy }} (avoids {{ .chezmoi.pathSeparator }}opt permission headaches)
+eval "$($HOME{{ .chezmoi.pathSeparator }}.homebrew{{ .chezmoi.pathSeparator }}bin{{ .chezmoi.pathSeparator }}brew shellenv)"
+
+# Extra tools you actually use
+export PATH="$HOME{{ .chezmoi.pathSeparator }}.npm-global{{ .chezmoi.pathSeparator }}bin{{ .chezmoi.pathListSeparator }}$PATH"        # npm global
+export PATH="$HOME{{ .chezmoi.pathSeparator }}.lmstudio{{ .chezmoi.pathSeparator }}bin{{ .chezmoi.pathListSeparator }}$PATH"          # LM Studio
+export PATH="$HOME{{ .chezmoi.pathSeparator }}.codeium{{ .chezmoi.pathSeparator }}windsurf{{ .chezmoi.pathSeparator }}bin{{ .chezmoi.pathListSeparator }}$PATH"  # Windsurf
+
+# OrbStack (load silently if present)
+source "$HOME{{ .chezmoi.pathSeparator }}.orbstack{{ .chezmoi.pathSeparator }}shell{{ .chezmoi.pathSeparator }}init.zsh" 2>{{ .chezmoi.pathSeparator }}dev{{ .chezmoi.pathSeparator }}null || true

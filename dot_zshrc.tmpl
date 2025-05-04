@@ -1,0 +1,17 @@
+# ~{{ .chezmoi.pathSeparator }}.zshrc  ─ lean and readable
+
+HISTSIZE=100000
+SAVEHIST=$HISTSIZE
+setopt INC_APPEND_HISTORY SHARE_HISTORY HIST_IGNORE_DUPS
+
+# Prompt & helpers
+eval "$(starship init zsh)"
+eval "$(zoxide init zsh)"
+
+# fzf keys (load if it exists, else ignore)
+[[ -f "$HOME{{ .chezmoi.pathSeparator }}.homebrew{{ .chezmoi.pathSeparator }}opt{{ .chezmoi.pathSeparator }}fzf{{ .chezmoi.pathSeparator }}shell{{ .chezmoi.pathSeparator }}key-bindings.zsh" ]] && \
+  source "$HOME{{ .chezmoi.pathSeparator }}.homebrew{{ .chezmoi.pathSeparator }}opt{{ .chezmoi.pathSeparator }}fzf{{ .chezmoi.pathSeparator }}shell{{ .chezmoi.pathSeparator }}key-bindings.zsh"
+
+# Aliases
+alias ls='eza -lah --group-directories-first'
+alias tailscale='{{ .chezmoi.pathSeparator }}Applications{{ .chezmoi.pathSeparator }}Tailscale.app{{ .chezmoi.pathSeparator }}Contents{{ .chezmoi.pathSeparator }}MacOS{{ .chezmoi.pathSeparator }}Tailscale'
