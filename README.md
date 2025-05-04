@@ -127,6 +127,17 @@ You can now select the Nerd Fonts in Warp settings.
 
 ---
 
+## 9. Apps Requiring Manual Installation
+
+Some applications require system-level components or privileged helpers, or are otherwise not available via Homebrew. These apps should be installed manually:
+
+- **Tailscale**: VPN and network mesh tool. [Download from tailscale.com](https://tailscale.com/download)
+- **Gifski**: GIF converter and animator. [Download from gifski.app](https://gifski.app/)
+- **Screens 5**: VNC/remote desktop app. Homebrew only provides Screens 4; download Screens 5 manually from [edovia.com/screens/mac/](https://edovia.com/screens/mac/)
+
+If you attempt to install these via Homebrew, you may be prompted for your macOS admin password, or the installation may fail. For a fully user-local setup, install these apps manually from their official websites.
+
+
 That’s it! 🎉 When your Mac comes back up, you should have your full development environment ready to go:
 
 * Warp is installed as your Terminal.
