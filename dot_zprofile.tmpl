@@ -1,6 +1,6 @@
-# ~{{ .chezmoi.pathSeparator }}.zprofile
+# ~/.zprofile
 
-# Home-local {{ .chezmoi.version.builtBy }} (avoids {{ .chezmoi.pathSeparator }}opt permission headaches)
+# Home-local Homebrew (avoids /opt permission headaches)
 eval "$($HOME{{ .chezmoi.pathSeparator }}.homebrew{{ .chezmoi.pathSeparator }}bin{{ .chezmoi.pathSeparator }}brew shellenv)"
 
 # Extra tools you actually use

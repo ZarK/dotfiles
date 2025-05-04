@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Use the Homebrew that’s already in ~/.homebrew (setup in README)
+BREW_BIN="$HOME/.homebrew/bin/brew"
+
+# 1. Install everything declared in the Brewfile
+"$BREW_BIN" bundle --file="{{ .chezmoi.sourceDir }}/Brewfile"
+
+# 2. Run the optional post-install script for fzf (adds key-bindings & completions)
+"$BREW_BIN" --prefix fzf &>/dev/null && \
+  "$( "$BREW_BIN" --prefix fzf )/install" --all --no-bash --no-fish --no-update-rc
+
+# 3. Done – future package changes happen via 'brew bundle dump' + commit
