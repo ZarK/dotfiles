@@ -15,12 +15,13 @@ eval "$(zoxide init zsh)"
 # Aliases
 alias ls='eza -lah --group-directories-first'
 alias tailscale='{{ .chezmoi.pathSeparator }}Applications{{ .chezmoi.pathSeparator }}Tailscale.app{{ .chezmoi.pathSeparator }}Contents{{ .chezmoi.pathSeparator }}MacOS{{ .chezmoi.pathSeparator }}Tailscale'
+alias edit='RETURN_DIR=$(pwd) && nano ~{ .chezmoi.pathSeparator }}.zshrc && cd "$RETURN_DIR" && source ~{ .chezmoi.pathSeparator }}.zshrc'
 
 # Developer Tools
 alias code="open ~{{ .chezmoi.pathSeparator }}Applications{{ .chezmoi.pathSeparator }}Visual\ Studio\ Code.app"
 alias ollama="~{{ .chezmoi.pathSeparator }}Applications{{ .chezmoi.pathSeparator }}Ollama.app/Contents/MacOS/Ollama"
 alias orb="~{{ .chezmoi.pathSeparator }}Applications{{ .chezmoi.pathSeparator }}OrbStack.app/Contents/MacOS/orb"
-alias windsurf="open ~{{ .chezmoi.pathSeparator }}Applications{{ .chezmoi.pathSeparator }}Windsurf.app"
+alias windsurf="$HOME{ .chezmoi.pathSeparator }}.codeium{ .chezmoi.pathSeparator }}windsurf{ .chezmoi.pathSeparator }}bin{ .chezmoi.pathSeparator }}windsurf"
 
 # Browsers
 alias vivaldi="open ~{{ .chezmoi.pathSeparator }}Applications{{ .chezmoi.pathSeparator }}Vivaldi.app"
@@ -35,3 +36,6 @@ alias raycast="open ~{{ .chezmoi.pathSeparator }}Applications{{ .chezmoi.pathSep
 # Utilities
 alias keka="open ~{{ .chezmoi.pathSeparator }}Applications{{ .chezmoi.pathSeparator }}Keka.app"
 alias protonmail="open ~{{ .chezmoi.pathSeparator }}Applications{{ .chezmoi.pathSeparator }}Proton\ Mail.app"
+
+# Exports
+export EDITOR=nano
