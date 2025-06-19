@@ -31,4 +31,14 @@ for version in $LTS_VERSIONS; do
   asdf install nodejs "$version"
 done
 
+# Set global versions to the latest installed versions
+LATEST_PYTHON=$(asdf list python | tail -1 | xargs)
+LATEST_NODEJS=$(asdf list nodejs | tail -1 | xargs)
+
+asdf set python "$LATEST_PYTHON"
+asdf set nodejs "$LATEST_NODEJS"
+
+echo "Set global Python version to: $LATEST_PYTHON"
+echo "Set global Node.js version to: $LATEST_NODEJS"
+
 # Done

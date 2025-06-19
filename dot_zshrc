@@ -1,0 +1,59 @@
+# ~/.zshrc  ─ lean and readable
+
+HISTSIZE=100000
+SAVEHIST=$HISTSIZE
+setopt INC_APPEND_HISTORY SHARE_HISTORY HIST_IGNORE_DUPS
+
+# Prompt & helpers
+eval "$(starship init zsh)"
+eval "$(zoxide init zsh)"
+
+# fzf keys (load if it exists, else ignore)
+[[ -f "$HOME/.homebrew/opt/fzf/shell/key-bindings.zsh" ]] && \
+  source "$HOME/.homebrew/opt/fzf/shell/key-bindings.zsh"
+
+# Aliases
+alias ls='eza -lah --group-directories-first'
+alias tailscale='/Applications/Tailscale.app/Contents/MacOS/Tailscale'
+alias edit='RETURN_DIR=$(pwd) && nano ~/.zshrc && cd "$RETURN_DIR" && source ~/.zshrc'
+
+# Developer Tools
+alias code="open ~/Applications/Visual\ Studio\ Code.app"
+alias ollama="~/Applications/Ollama.app/Contents/MacOS/Ollama"
+alias orb="~/Applications/OrbStack.app/Contents/MacOS/orb"
+alias windsurf="$HOME/.codeium/windsurf/bin/windsurf"
+
+# Browsers
+alias vivaldi="open ~/Applications/Vivaldi.app"
+
+# Media
+alias vlc="open ~/Applications/VLC.app"
+
+# Productivity
+alias obsidian="open ~/Applications/Obsidian.app"
+alias raycast="open ~/Applications/Raycast.app"
+
+# Utilities
+alias keka="open ~/Applications/Keka.app"
+alias protonmail="open ~/Applications/Proton\ Mail.app"
+
+# Dynamic content added by installers
+if [ -s "$HOME/.bun/_bun" ]; then
+  # bun completions
+  source "$HOME/.bun/_bun"
+  
+  # bun
+  export BUN_INSTALL="$HOME/.bun"
+  export PATH="$BUN_INSTALL/bin:$PATH"
+fi
+
+if [ -d "$HOME/.codeium/windsurf/bin" ]; then
+  # Added by Windsurf
+  export PATH="$HOME/.codeium/windsurf/bin:$PATH"
+fi
+
+# asdf version manager
+. "$HOME/.homebrew/opt/asdf/libexec/asdf.sh"
+
+# Exports
+export EDITOR=nano
