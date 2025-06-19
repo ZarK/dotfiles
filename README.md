@@ -28,7 +28,7 @@ cd ~
 mkdir -p .homebrew && curl -L https://github.com/Homebrew/brew/tarball/master | tar -xz --strip-components 1 -C .homebrew
 
 # Set up Homebrew in the PATH for the current session
-eval "$(./homebrew/bin/brew shellenv)"
+eval "$(.homebrew/bin/brew shellenv)"
 
 # Update Homebrew and fix permissions (as recommended by Homebrew)
 brew update --force --quiet
@@ -37,7 +37,15 @@ chmod -R go-w "$(./homebrew/bin/brew --prefix)/share/zsh"
 
 > **Note:** The above uses Homebrew’s “untar anywhere” approach to install it in your home directory. We avoid the default `/usr/local` or `/opt/homebrew` to keep everything local to your user.
 
-## 3. Install GitHub CLI (`gh`)
+## 3. Install XCode Command Line Tools
+
+These are required to install further developer tools like GitHub CLI
+
+```shell
+xcode-select --install
+```
+
+## 4. Install GitHub CLI (`gh`)
 
 Now use Homebrew to install the GitHub CLI tool. In Warp, run:
 
@@ -47,7 +55,7 @@ brew install gh
 
 This installs the `gh` command, which you’ll use to authenticate with GitHub and manage your SSH keys.
 
-## 4. Authenticate with GitHub (HTTPS)
+## 5. Authenticate with GitHub (HTTPS)
 
 Log in to your GitHub account via the CLI:
 
@@ -63,7 +71,7 @@ When prompted:
 
 After a successful login, `gh` is authorized to act on your behalf on GitHub (via HTTPS). You can verify by running `gh auth status` if curious.
 
-## 5. Generate and Add an SSH Key
+## 6. Generate and Add an SSH Key
 
 Next, set up SSH access for Git operations.
 
@@ -89,7 +97,7 @@ This command uses your logged-in GitHub CLI session to add the key to your GitHu
 
 **Note:** If you set a passphrase on the key, macOS may ask for it when using the key. Consider adding the key to the ssh-agent (and macOS Keychain) for convenience, so you won’t have to enter the passphrase every time.
 
-## 6. Install Chezmoi
+## 7. Install Chezmoi
 
 With Homebrew ready, install [Chezmoi](https://www.chezmoi.io/) (the dotfiles manager):
 
@@ -99,7 +107,7 @@ brew install chezmoi
 
 This provides the `chezmoi` command, which you will use to pull down your dotfiles and apply them.
 
-## 7. Pull and Apply Dotfiles with Chezmoi (via SSH)
+## 8. Pull and Apply Dotfiles with Chezmoi (via SSH)
 
 > You can run this step instantly as a Warp Workflow with the alias `init-chezmoi`, or run the following command manually in Warp:
 
@@ -115,7 +123,7 @@ This command tells chezmoi to **clone your dotfiles repo over SSH** (using the `
 
   *You don’t need to manually run `brew bundle` — the Chezmoi init/apply process did it via that script.*  If you ever update your Brewfile, re-running the chezmoi apply or the script will install any new items.
 
-## 8. Refresh Font Cache (for Nerd Fonts)
+## 9. Refresh Font Cache (for Nerd Fonts)
 
 If your Brewfile included any Nerd Fonts (commonly used for development setups), macOS might not show the new fonts immediately. To ensure they appear in your apps and in Warp, refresh the macOS font cache:
 
@@ -127,7 +135,7 @@ You can now select the Nerd Fonts in Warp settings.
 
 ---
 
-## 9. Apps Requiring Manual Installation
+## 10. Apps Requiring Manual Installation
 
 Some applications require system-level components or privileged helpers, or are otherwise not available via Homebrew. These apps should be installed manually:
 
