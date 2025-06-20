@@ -107,7 +107,11 @@ brew install chezmoi
 
 This provides the `chezmoi` command, which you will use to pull down your dotfiles and apply them.
 
-## 8. Pull and Apply Dotfiles with Chezmoi (via SSH)
+## 8. Sign in to Mac App Store
+
+Open the **Mac App Store** app and sign in with your Apple ID. This enables automatic installation of Mac App Store apps during the setup process.
+
+## 9. Pull and Apply Dotfiles with Chezmoi (via SSH)
 
 > You can run this step instantly as a Warp Workflow with the alias `init-chezmoi`, or run the following command manually in Warp:
 
@@ -123,7 +127,7 @@ This command tells chezmoi to **clone your dotfiles repo over SSH** (using the `
 
   *You don’t need to manually run `brew bundle` — the Chezmoi init/apply process did it via that script.*  If you ever update your Brewfile, re-running the chezmoi apply or the script will install any new items.
 
-## 9. Refresh Font Cache (for Nerd Fonts)
+## 10. Refresh Font Cache (for Nerd Fonts)
 
 If your Brewfile included any Nerd Fonts (commonly used for development setups), macOS might not show the new fonts immediately. To ensure they appear in your apps and in Warp, refresh the macOS font cache:
 
@@ -135,15 +139,16 @@ You can now select the Nerd Fonts in Warp settings.
 
 ---
 
-## 10. Apps Requiring Manual Installation
+## 11. Mac App Store Apps (Automatic Installation)
 
-Some applications require system-level components or privileged helpers, or are otherwise not available via Homebrew. These apps should be installed manually:
+The following apps are automatically installed from the Mac App Store during setup (provided you completed step 8):
 
-- **Tailscale**: VPN and network mesh tool. [Download from tailscale.com](https://tailscale.com/download)
-- **Gifski**: GIF converter and animator. [Download from gifski.app](https://gifski.app/)
-- **Screens 5**: VNC/remote desktop app. Homebrew only provides Screens 4; download Screens 5 manually from [edovia.com/screens/mac/](https://edovia.com/screens/mac/)
+- **Tailscale** (1475387142): VPN and network mesh tool
+- **Gifski** (1351639930): GIF converter and animator  
+- **SimpleLogin** (1494359858): Email aliasing service
+- **Screens 5** (1663070235): VNC/remote desktop client
 
-If you attempt to install these via Homebrew, you may be prompted for your macOS admin password, or the installation may fail. For a fully user-local setup, install these apps manually from their official websites.
+These apps are installed via the `mas` command line tool during the `brew bundle` step.
 
 
 That’s it! 🎉 When your Mac comes back up, you should have your full development environment ready to go:
