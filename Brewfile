@@ -14,6 +14,7 @@ brew "python@3.12"              # Python 3.12
 brew "git"                      # git CLI tools
 brew "chezmoi"                  # dot-file manager (self-host)
 brew "uv"                       # package manager for Python
+brew "fontconfig"              # font configuration library for better font management
 # brew "bun"  # Cannot be installed via Homebrew, intalled by run_once_install_other.sh
 
 ###############################################################################

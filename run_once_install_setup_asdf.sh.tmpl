@@ -7,9 +7,10 @@ if ! command -v asdf &>/dev/null; then
   exit 1
 fi
 
-# Ensure asdf plugins for python and nodejs are installed
+# Ensure asdf plugins for python, nodejs, and dotnet are installed
 asdf plugin add python || true
 asdf plugin add nodejs || true
+asdf plugin add dotnet || true
 
 # Install latest patch versions of Python 3.11, 3.12, 3.13
 for minor in 3.11 3.12 3.13; do
@@ -31,14 +32,41 @@ for version in $LTS_VERSIONS; do
   asdf install nodejs "$version"
 done
 
-# Set global versions to the latest installed versions
-LATEST_PYTHON=$(asdf list python | tail -1 | xargs)
-LATEST_NODEJS=$(asdf list nodejs | tail -1 | xargs)
+# Install the latest patch versions of the two most recent .NET LTS major versions
+# (.NET LTS versions are even-numbered major versions: 6, 8, 10, etc.)
+asdf list all dotnet | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | awk -F. '{print $1}' | sort -n | uniq | awk '$1 % 2 == 0' | tail -2 | while read -r major; do
+  latest=$(asdf list all dotnet | grep -E "^${major}\.[0-9]+\.[0-9]+$" | tail -1)
+  if [ -n "$latest" ]; then
+    echo "Installing .NET $latest"
+    asdf install dotnet "$latest"
+  fi
+done
 
-asdf set python "$LATEST_PYTHON"
-asdf set nodejs "$LATEST_NODEJS"
+# Reshim all tools to ensure shims are properly created
+asdf reshim python
+asdf reshim nodejs
+asdf reshim dotnet
 
-echo "Set global Python version to: $LATEST_PYTHON"
-echo "Set global Node.js version to: $LATEST_NODEJS"
+# Set global versions (use latest Python, Node.js, and .NET)
+latest_python=$(asdf list python | sed 's/^[[:space:]]*//' | sed 's/^\*//' | sort -V | tail -1)
+latest_nodejs=$(asdf list nodejs | sed 's/^[[:space:]]*//' | sed 's/^\*//' | sort -V | tail -1)
+latest_dotnet=$(asdf list dotnet | sed 's/^[[:space:]]*//' | sed 's/^\*//' | sort -V | tail -1)
+
+# Set global versions without asterisks
+if [ -n "$latest_python" ]; then
+  echo "Set global Python version to: $latest_python"
+  asdf set python "$latest_python"
+fi
+if [ -n "$latest_nodejs" ]; then
+  echo "Set global Node.js version to: $latest_nodejs"
+  asdf set nodejs "$latest_nodejs"
+fi
+if [ -n "$latest_dotnet" ]; then
+  echo "Set global .NET version to: $latest_dotnet"
+  asdf set dotnet "$latest_dotnet"
+fi
+
+# Final reshim to ensure all shims are up-to-date with global versions
+asdf reshim
 
 # Done
