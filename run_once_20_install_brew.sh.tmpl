@@ -8,7 +8,14 @@ BREW_BIN="$HOME/.homebrew/bin/brew"
 "$BREW_BIN" bundle --file="{{ .chezmoi.sourceDir }}/Brewfile"
 
 # 2. Run the optional post-install script for fzf (adds key-bindings & completions)
-"$BREW_BIN" --prefix fzf &>/dev/null && \
-  "$( "$BREW_BIN" --prefix fzf )/install" --all --no-bash --no-fish --no-update-rc
+# Only run if fzf key bindings aren't already set up in zshrc
+if "$BREW_BIN" --prefix fzf &>/dev/null; then
+  if ! grep -q "fzf/shell/key-bindings.zsh" ~/.zshrc 2>/dev/null; then
+    echo "Setting up fzf key bindings and completions..."
+    "$( "$BREW_BIN" --prefix fzf )/install" --all --no-bash --no-fish --no-update-rc
+  else
+    echo "fzf key bindings already configured in ~/.zshrc"
+  fi
+fi
 
 # 3. Done – future package changes happen via 'brew bundle dump' + commit

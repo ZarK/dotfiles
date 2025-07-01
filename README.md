@@ -18,7 +18,19 @@ Once Warp is installed, launch it and perform the rest of the setup in Warp.
 
 ## 2. Install 1Password (Early Setup)
 
-Before continuing, install 1Password manually from the Mac App Store or download it directly from [1password.com](https://1password.com). This is needed early in the process for credential management.
+Before continuing, set up 1Password for credential management:
+
+```shell
+# Create the ~/Applications folder for user-installed apps
+mkdir -p ~/Applications
+```
+
+1. **Install 1Password** from the Mac App Store (search for "1Password")
+2. **Move 1Password** from `/Applications` to `~/Applications` (drag and drop in Finder)
+3. **Launch 1Password** from `~/Applications` and sign in to your account
+4. **Use 1Password to sign in to Warp** when prompted (for seamless credential management)
+
+This early setup ensures you have secure credential management available throughout the bootstrap process.
 
 ## 3. Install Homebrew in `~/.homebrew` (Local User Install)
 
@@ -30,14 +42,9 @@ With Warp open, install Homebrew locally (to avoid any system-wide changes).
 cd ~
 # Download Homebrew into .homebrew (no sudo needed)
 mkdir -p .homebrew && curl -L https://github.com/Homebrew/brew/tarball/master | tar -xz --strip-components 1 -C .homebrew
-
-# Set up Homebrew in the PATH for the current session
-eval "$(.homebrew/bin/brew shellenv)"
-
-# Update Homebrew and fix permissions (as recommended by Homebrew)
-brew update --force --quiet
-chmod -R go-w "$(~/.homebrew/bin/brew --prefix)/share/zsh"
 ```
+
+**Note:** The PATH setup, updates, and permissions will be properly configured when you run chezmoi later. For now, just having Homebrew downloaded is sufficient.
 
 > **Note:** The above uses Homebrew’s “untar anywhere” approach to install it in your home directory. We avoid the default `/usr/local` or `/opt/homebrew` to keep everything local to your user.
 
@@ -54,7 +61,7 @@ xcode-select --install
 Now use Homebrew to install the GitHub CLI tool. In Warp, run:
 
 ```shell
-brew install gh
+~/.homebrew/bin/brew install gh
 ```
 
 This installs the `gh` command, which you'll use to authenticate with GitHub and manage your SSH keys.
