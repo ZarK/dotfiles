@@ -15,7 +15,7 @@ eval "$(zoxide init zsh)"
 # Aliases
 alias ls='eza -lah --group-directories-first'
 alias tailscale='/Applications/Tailscale.app/Contents/MacOS/Tailscale'
-alias edit='RETURN_DIR=$(pwd) && nano ~/.zshrc && cd "$RETURN_DIR" && source ~/.zshrc'
+alias edit='RETURN_DIR=$(pwd) && micro ~/.zshrc && cd "$RETURN_DIR" && source ~/.zshrc'
 
 # Developer Tools
 alias code="open ~/Applications/Visual\ Studio\ Code.app"
@@ -56,4 +56,12 @@ fi
 . "$HOME/.homebrew/opt/asdf/libexec/asdf.sh"
 
 # Exports
-export EDITOR=nano
+export EDITOR=micro
+export HOMEBREW_DISPLAY_INSTALL_TIMES=1
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# Added by Windsurf
+export PATH="/Users/tjalve.work/.codeium/windsurf/bin:$PATH"

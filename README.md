@@ -16,7 +16,11 @@ For more details, visit [https://warp.dev](https://warp.dev).
 
 Once Warp is installed, launch it and perform the rest of the setup in Warp.
 
-## 2. Install Homebrew in `~/.homebrew` (Local User Install)
+## 2. Install 1Password (Early Setup)
+
+Before continuing, install 1Password manually from the Mac App Store or download it directly from [1password.com](https://1password.com). This is needed early in the process for credential management.
+
+## 3. Install Homebrew in `~/.homebrew` (Local User Install)
 
 With Warp open, install Homebrew locally (to avoid any system-wide changes).
 
@@ -32,12 +36,12 @@ eval "$(.homebrew/bin/brew shellenv)"
 
 # Update Homebrew and fix permissions (as recommended by Homebrew)
 brew update --force --quiet
-chmod -R go-w "$(./homebrew/bin/brew --prefix)/share/zsh"
+chmod -R go-w "$(~/.homebrew/bin/brew --prefix)/share/zsh"
 ```
 
 > **Note:** The above uses Homebrew’s “untar anywhere” approach to install it in your home directory. We avoid the default `/usr/local` or `/opt/homebrew` to keep everything local to your user.
 
-## 3. Install XCode Command Line Tools
+## 4. Install XCode Command Line Tools
 
 These are required to install further developer tools like GitHub CLI
 
@@ -45,7 +49,7 @@ These are required to install further developer tools like GitHub CLI
 xcode-select --install
 ```
 
-## 4. Install GitHub CLI (`gh`)
+## 5. Install GitHub CLI (`gh`)
 
 Now use Homebrew to install the GitHub CLI tool. In Warp, run:
 
@@ -53,9 +57,9 @@ Now use Homebrew to install the GitHub CLI tool. In Warp, run:
 brew install gh
 ```
 
-This installs the `gh` command, which you’ll use to authenticate with GitHub and manage your SSH keys.
+This installs the `gh` command, which you'll use to authenticate with GitHub and manage your SSH keys.
 
-## 5. Authenticate with GitHub (HTTPS)
+## 6. Authenticate with GitHub (HTTPS)
 
 Log in to your GitHub account via the CLI:
 
@@ -71,7 +75,7 @@ When prompted:
 
 After a successful login, `gh` is authorized to act on your behalf on GitHub (via HTTPS). You can verify by running `gh auth status` if curious.
 
-## 6. Generate and Add an SSH Key
+## 7. Generate and Add an SSH Key
 
 Next, set up SSH access for Git operations.
 
@@ -84,11 +88,15 @@ Next, set up SSH access for Git operations.
   # Hit Enter to accept the default file path (~/.ssh/id_ed25519). Choose a passphrase (or leave empty for no passphrase) and confirm.
   ```
 
-**Add the SSH key to GitHub**. Upload your public key to GitHub with the CLI, using a sanitized title:
+**Add the SSH key to GitHub**. First, ensure GitHub CLI has the required scopes, then upload your public key:
 
   ```shell
+  # Refresh GitHub auth with required scopes
+  gh auth refresh -h github.com -s admin:public_key
+  
+  # Add SSH key with sanitized title
   USER=$(whoami)
-  HOST=$(scutil --get ComputerName | tr -d "’'\"" | tr ' ' '_')
+  HOST=$(scutil --get ComputerName | tr -d "''\"" | tr ' ' '_')
   TITLE="$USER@$HOST"
   gh ssh-key add ~/.ssh/id_ed25519.pub --title "$TITLE"
   ```
@@ -97,7 +105,7 @@ This command uses your logged-in GitHub CLI session to add the key to your GitHu
 
 **Note:** If you set a passphrase on the key, macOS may ask for it when using the key. Consider adding the key to the ssh-agent (and macOS Keychain) for convenience, so you won’t have to enter the passphrase every time.
 
-## 7. Install Chezmoi
+## 8. Install Chezmoi
 
 With Homebrew ready, install [Chezmoi](https://www.chezmoi.io/) (the dotfiles manager):
 
@@ -107,11 +115,11 @@ brew install chezmoi
 
 This provides the `chezmoi` command, which you will use to pull down your dotfiles and apply them.
 
-## 8. Sign in to Mac App Store
+## 9. Sign in to Mac App Store
 
 Open the **Mac App Store** app and sign in with your Apple ID. This enables automatic installation of Mac App Store apps during the setup process.
 
-## 9. Pull and Apply Dotfiles with Chezmoi (via SSH)
+## 10. Pull and Apply Dotfiles with Chezmoi (via SSH)
 
 > You can run this step instantly as a Warp Workflow with the alias `init-chezmoi`, or run the following command manually in Warp:
 
@@ -127,7 +135,7 @@ This command tells chezmoi to **clone your dotfiles repo over SSH** (using the `
 
   *You don’t need to manually run `brew bundle` — the Chezmoi init/apply process did it via that script.*  If you ever update your Brewfile, re-running the chezmoi apply or the script will install any new items.
 
-## 10. Refresh Font Cache (for Nerd Fonts)
+## 11. Refresh Font Cache (for Nerd Fonts)
 
 If your Brewfile included any Nerd Fonts (commonly used for development setups), macOS might not show the new fonts immediately. To ensure they appear in your apps and in Warp, refresh the macOS font cache:
 
@@ -139,7 +147,7 @@ You can now select the Nerd Fonts in Warp settings.
 
 ---
 
-## 11. Mac App Store Apps (Automatic Installation)
+## 12. Mac App Store Apps (Automatic Installation)
 
 The following apps are automatically installed from the Mac App Store during setup (provided you completed step 8):
 

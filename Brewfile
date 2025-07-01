@@ -10,12 +10,12 @@ brew "fd"                       # find replacement
 brew "eza"                      # modern ls
 brew "bat"                      # cat with syntax
 brew "gh"                       # GitHub CLI
-brew "python@3.12"              # Python 3.12
 brew "git"                      # git CLI tools
 brew "chezmoi"                  # dot-file manager (self-host)
 brew "uv"                       # package manager for Python
-brew "fontconfig"              # font configuration library for better font management
-brew "mas"                     # Mac App Store CLI
+brew "fontconfig"               # font configuration library for better font management
+brew "mas"                      # Mac App Store CLI
+brew "micro"                    # Editor that replaces nano
 # brew "bun"  # Cannot be installed via Homebrew, intalled by run_once_install_other.sh
 
 ###############################################################################
@@ -42,6 +42,7 @@ cask "keka"
 cask "proton-drive"
 cask "proton-mail"
 cask "protonvpn"
+cask "slack"
 
 ###############################################################################
 # Mac App Store apps (installed via mas)

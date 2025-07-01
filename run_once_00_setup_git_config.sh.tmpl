@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Set up git configuration using GitHub API
+# This script fetches the authenticated user's name and email from GitHub
+# and configures git globally with this information
+
+echo "Setting up git configuration from GitHub user info..."
+
+# Check if gh is authenticated
+if ! gh auth status &>/dev/null; then
+    echo "Error: GitHub CLI is not authenticated. Please run 'gh auth login' first."
+    exit 1
+fi
+
+# Refresh GitHub auth with required scopes if needed
+echo "Ensuring GitHub CLI has required scopes..."
+gh auth refresh -h github.com -s user
+
+# Get user info from GitHub API
+USER_NAME=$(gh api user --jq '.name // .login')
+USER_EMAIL=$(gh api user/emails --jq '.[] | select(.primary == true) | .email')
+
+# Fallback to GitHub noreply email if primary email is not available
+if [ -z "$USER_EMAIL" ] || [ "$USER_EMAIL" = "null" ]; then
+    USER_LOGIN=$(gh api user --jq '.login')
+    USER_EMAIL="${USER_LOGIN}@users.noreply.github.com"
+    echo "Warning: Using GitHub noreply email as primary email is not available"
+fi
+
+# Set git config globally
+echo "Configuring git with:"
+echo "  Name: $USER_NAME"
+echo "  Email: $USER_EMAIL"
+
+git config --global user.name "$USER_NAME"
+git config --global user.email "$USER_EMAIL"
+
+echo "Git configuration completed successfully!"
