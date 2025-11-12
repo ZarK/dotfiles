@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Switch Friday config profile between tjalve and tjalve.work
+
+CONFIGS_DIR="/usr/local/etc/friday-configs"
+SYMLINK="/opt/homebrew/etc/friday"
+
+if [ ! -d "$CONFIGS_DIR" ]; then
+  echo "Error: Friday configs directory not found at $CONFIGS_DIR"
+  exit 1
+fi
+
+# Get current profile
+if [ -L "$SYMLINK" ]; then
+  current=$(basename "$(readlink "$SYMLINK")")
+else
+  current="none"
+fi
+
+# If no argument provided, show current profile and list available
+if [ $# -eq 0 ]; then
+  echo "Current Friday profile: $current"
+  echo ""
+  echo "Available profiles:"
+  for profile in "$CONFIGS_DIR"/*; do
+    name=$(basename "$profile")
+    if [ "$name" = "$current" ]; then
+      echo "  * $name (active)"
+    else
+      echo "    $name"
+    fi
+  done
+  echo ""
+  echo "Usage: friday-switch-profile <profile>"
+  exit 0
+fi
+
+profile="$1"
+target="$CONFIGS_DIR/$profile"
+
+# Verify profile exists
+if [ ! -d "$target" ]; then
+  echo "Error: Profile '$profile' not found"
+  echo ""
+  echo "Available profiles:"
+  ls -1 "$CONFIGS_DIR"
+  exit 1
+fi
+
+# Switch symlink
+if [ -L "$SYMLINK" ]; then
+  sudo rm "$SYMLINK"
+elif [ -e "$SYMLINK" ]; then
+  echo "Error: $SYMLINK exists but is not a symlink"
+  exit 1
+fi
+
+sudo ln -s "$target" "$SYMLINK"
+
+# Fix ownership
+sudo chown -R $(whoami) "$target"
+
+echo "✓ Switched Friday profile to: $profile"
+ls -l "$SYMLINK"
