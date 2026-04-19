@@ -3,7 +3,7 @@ set -euo pipefail
 
 AI_MODEL_DIR="${AI_MODEL_DIR:-$HOME/models}"
 AI_OMLX_HOST="${AI_OMLX_HOST:-127.0.0.1}"
-AI_OMLX_PORT="${AI_OMLX_PORT:-8000}"
+AI_OMLX_PORT="${AI_OMLX_PORT:-11435}"
 AI_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/ai"
 PID_FILE="$AI_STATE_DIR/omlx.pid"
 LOG_DIR="$AI_STATE_DIR/logs"
@@ -38,15 +38,44 @@ read_pid() {
   tr -d '[:space:]' < "$PID_FILE"
 }
 
+pid_looks_like_omlx() {
+  local pid="$1"
+  local command
+
+  command="$(ps -p "$pid" -o args= 2>/dev/null || true)"
+  case "$command" in
+    *"omlx serve"*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+listening_pid() {
+  local pid
+
+  command -v lsof >/dev/null 2>&1 || return 1
+  for pid in $(lsof -n -P -iTCP:"$AI_OMLX_PORT" -sTCP:LISTEN -t 2>/dev/null); do
+    if pid_looks_like_omlx "$pid"; then
+      printf '%s\n' "$pid"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 is_running() {
   local pid
-  pid="$(read_pid)" || return 1
-  [ -n "$pid" ] || return 1
-  kill -0 "$pid" 2>/dev/null
+  pid="$(listening_pid || true)"
+  if [ -n "$pid" ]; then
+    printf '%s\n' "$pid" > "$PID_FILE"
+    return 0
+  fi
+  return 1
 }
 
 start_server() {
   require_cmd omlx
+  require_cmd lsof
   mkdir -p "$AI_MODEL_DIR" "$LOG_DIR"
 
   if is_running; then
@@ -55,27 +84,35 @@ start_server() {
   fi
 
   nohup omlx serve --model-dir "$AI_MODEL_DIR" --port "$AI_OMLX_PORT" >> "$LOG_FILE" 2>&1 &
-  echo "$!" > "$PID_FILE"
-  sleep 2
+  local launcher_pid="$!"
 
-  if is_running; then
-    printf 'Started oMLX on %s using models from %s\n' "$(server_url)" "$AI_MODEL_DIR"
-  else
-    printf 'oMLX did not stay running. Check %s\n' "$LOG_FILE" >&2
-    exit 1
-  fi
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    if is_running; then
+      printf 'Started oMLX on %s using models from %s\n' "$(server_url)" "$AI_MODEL_DIR"
+      return 0
+    fi
+    if ! kill -0 "$launcher_pid" 2>/dev/null; then
+      break
+    fi
+    sleep 1
+  done
+
+  rm -f "$PID_FILE"
+  printf 'oMLX did not stay running. Check %s\n' "$LOG_FILE" >&2
+  exit 1
 }
 
 stop_server() {
   local pid
 
-  if ! is_running; then
+  pid="$(listening_pid || true)"
+  if [ -z "$pid" ]; then
     rm -f "$PID_FILE"
     printf 'oMLX is not running.\n'
     return 0
   fi
 
-  pid="$(read_pid)"
+  printf '%s\n' "$pid" > "$PID_FILE"
   kill "$pid"
 
   for _ in 1 2 3 4 5 6 7 8 9 10; do
@@ -103,10 +140,14 @@ url = sys.argv[1]
 with urllib.request.urlopen(url, timeout=5) as response:
     payload = json.load(response)
 
+found = False
 for item in payload.get("data", []):
     model_id = item.get("id")
     if model_id:
+        found = True
         print(model_id)
+if not found:
+    print("No models reported by oMLX.")
 PY
 }
 

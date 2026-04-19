@@ -3,7 +3,7 @@ set -euo pipefail
 
 AI_HOME="${AI_HOME:-$HOME/.ai}"
 AI_OMLX_HOST="${AI_OMLX_HOST:-127.0.0.1}"
-AI_OMLX_PORT="${AI_OMLX_PORT:-8000}"
+AI_OMLX_PORT="${AI_OMLX_PORT:-11435}"
 AI_OPENCLAW_CONTEXT_WINDOW="${AI_OPENCLAW_CONTEXT_WINDOW:-128000}"
 AI_OPENCLAW_MAX_TOKENS="${AI_OPENCLAW_MAX_TOKENS:-8192}"
 PRIMARY_MANIFEST="${AI_MANIFEST_FILE:-$AI_HOME/manifest.txt}"
@@ -51,6 +51,61 @@ else:
 PY
 }
 
+list_models_from_server() {
+  python3 - "$AI_OMLX_HOST" "$AI_OMLX_PORT" <<'PY'
+import json
+import sys
+import urllib.request
+
+host = sys.argv[1]
+port = sys.argv[2]
+url = f"http://{host}:{port}/v1/models"
+
+try:
+    with urllib.request.urlopen(url, timeout=5) as response:
+        payload = json.load(response)
+except Exception:
+    raise SystemExit(1)
+
+found = False
+for item in payload.get("data", []):
+    model_id = item.get("id")
+    if model_id:
+        found = True
+        print(model_id)
+
+if not found:
+    raise SystemExit(1)
+PY
+}
+
+server_status() {
+  python3 - "$AI_OMLX_HOST" "$AI_OMLX_PORT" <<'PY'
+import json
+import sys
+import urllib.request
+
+host = sys.argv[1]
+port = sys.argv[2]
+url = f"http://{host}:{port}/v1/models"
+
+try:
+    with urllib.request.urlopen(url, timeout=5) as response:
+        payload = json.load(response)
+except Exception:
+    print("unreachable")
+    raise SystemExit(0)
+
+for item in payload.get("data", []):
+    model_id = item.get("id")
+    if model_id:
+        print("models")
+        raise SystemExit(0)
+
+print("empty")
+PY
+}
+
 detect_model_from_manifest() {
   python3 - "$PRIMARY_MANIFEST" <<'PY'
 import sys
@@ -76,11 +131,14 @@ configure_openclaw() {
   require_cmd openclaw
 
   local model_id="${1:-}"
+  local model_source="explicit"
   if [ -z "$model_id" ]; then
     model_id="$(detect_model_from_server || true)"
+    [ -n "$model_id" ] && model_source="server"
   fi
   if [ -z "$model_id" ]; then
     model_id="$(detect_model_from_manifest || true)"
+    [ -n "$model_id" ] && model_source="manifest"
   fi
 
   if [ -z "$model_id" ]; then
@@ -134,15 +192,30 @@ PY
   openclaw config set --batch-json "$batch_json" --dry-run --json >/dev/null
   openclaw config set --batch-json "$batch_json"
   openclaw config validate >/dev/null
+  if [ "$model_source" = "manifest" ]; then
+    printf 'Configured OpenClaw from manifest fallback because oMLX did not report any live models.\n'
+  fi
   printf 'Configured OpenClaw to use oMLX model omlx/%s\n' "$model_id"
 }
 
 show_status() {
   require_cmd openclaw
+  local live_models
+  local live_status
+  live_models="$(list_models_from_server || true)"
+  live_status="$(server_status)"
+
   printf 'Config file: '
   openclaw config file
   printf 'Primary model: '
   openclaw config get agents.defaults.model.primary || true
+  if [ "$live_status" = "models" ] && [ -n "$live_models" ]; then
+    printf 'Live oMLX models:\n%s\n' "$live_models"
+  elif [ "$live_status" = "empty" ]; then
+    printf 'Live oMLX models: none reported by %s:%s\n' "$AI_OMLX_HOST" "$AI_OMLX_PORT"
+  else
+    printf 'Live oMLX models: server unreachable at %s:%s\n' "$AI_OMLX_HOST" "$AI_OMLX_PORT"
+  fi
   printf 'Provider config:\n'
   openclaw config get models.providers.omlx --json || true
   printf 'Known oMLX models:\n'

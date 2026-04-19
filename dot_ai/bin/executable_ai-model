@@ -9,7 +9,7 @@ LOCAL_MANIFEST="$AI_HOME/manifest.local.txt"
 usage() {
   cat <<'EOF'
 Usage:
-  ai-model download <huggingface-repo> [target-name]
+  ai-model download <huggingface-url-or-repo> [target-name]
   ai-model download --manifest
   ai-model list
   ai-model path
@@ -17,6 +17,7 @@ Usage:
 
 Examples:
   ai-model download mlx-community/Hermes-4-70B-MLX-4bit
+  ai-model download https://huggingface.co/Brooooooklyn/Qwen3.6-35B-A3B-UD-Q8_K_XL-mlx
   ai-model download --manifest
 EOF
 }
@@ -35,8 +36,76 @@ print(sys.argv[1].strip())
 PY
 }
 
+normalize_repo() {
+  python3 - "$1" <<'PY'
+from urllib.parse import urlparse
+import sys
+
+value = sys.argv[1].strip()
+if not value:
+    raise SystemExit("Missing Hugging Face repository or URL")
+
+if value.startswith(("http://", "https://")):
+    parsed = urlparse(value)
+    if parsed.netloc not in {"huggingface.co", "www.huggingface.co"}:
+        raise SystemExit(f"Unsupported model URL: {value}")
+    parts = [part for part in parsed.path.split("/") if part]
+    if parts and parts[0] in {"models", "datasets", "spaces"}:
+        if parts[0] != "models":
+            raise SystemExit(f"Only Hugging Face model URLs are supported: {value}")
+        parts = parts[1:]
+    if len(parts) < 2:
+        raise SystemExit(f"Could not determine repository from URL: {value}")
+    print("/".join(parts[:2]))
+else:
+    parts = [part for part in value.strip("/").split("/") if part]
+    if len(parts) != 2:
+        raise SystemExit(
+            "Expected owner/repo or a Hugging Face model URL, for example "
+            "Brooooooklyn/Qwen3.6-35B-A3B-UD-Q8_K_XL-mlx"
+        )
+    print("/".join(parts))
+PY
+}
+
+remember_repo() {
+  python3 - "$1" "$PRIMARY_MANIFEST" "$LOCAL_MANIFEST" <<'PY'
+from pathlib import Path
+import sys
+
+repo, primary_manifest, local_manifest = sys.argv[1:4]
+
+def contains_repo(path: str) -> bool:
+    try:
+        with open(path, encoding="utf-8") as handle:
+            for raw_line in handle:
+                if raw_line.split("#", 1)[0].strip() == repo:
+                    return True
+    except OSError:
+        return False
+    return False
+
+if contains_repo(primary_manifest) or contains_repo(local_manifest):
+    print("present")
+    raise SystemExit(0)
+
+path = Path(local_manifest)
+path.parent.mkdir(parents=True, exist_ok=True)
+existing = path.read_text(encoding="utf-8") if path.exists() else ""
+prefix = "" if not existing or existing.endswith("\n") else "\n"
+with path.open("a", encoding="utf-8") as handle:
+    handle.write(f"{prefix}{repo}\n")
+
+print("added")
+PY
+}
+
 download_repo() {
-  local repo="$1"
+  local raw_repo="$1"
+  local repo
+  local remember_status
+
+  repo="$(normalize_repo "$raw_repo")"
   local target_name="${2:-${repo##*/}}"
   local target_dir="$AI_MODEL_DIR/$target_name"
 
@@ -44,6 +113,11 @@ download_repo() {
   mkdir -p "$AI_MODEL_DIR"
   printf 'Downloading %s -> %s\n' "$repo" "$target_dir"
   uv tool run --from huggingface_hub hf download "$repo" --local-dir "$target_dir"
+
+  remember_status="$(remember_repo "$repo")"
+  if [ "$remember_status" = "added" ]; then
+    printf 'Added %s to %s\n' "$repo" "$LOCAL_MANIFEST"
+  fi
 }
 
 download_manifest_file() {

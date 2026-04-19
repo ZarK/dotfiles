@@ -2,7 +2,12 @@
 set -euo pipefail
 
 AI_HOME="${AI_HOME:-$HOME/.ai}"
-BREW_BIN="${HOMEBREW_PREFIX:-$HOME/.homebrew}/bin/brew"
+
+if command -v brew >/dev/null 2>&1; then
+	BREW_BIN="$(command -v brew)"
+else
+	BREW_BIN="${HOMEBREW_PREFIX:-$HOME/.homebrew}/bin/brew"
+fi
 
 require_cmd() {
 	if ! command -v "$1" >/dev/null 2>&1; then
