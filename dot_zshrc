@@ -47,9 +47,6 @@ alias keka="open ~/Applications/Keka.app"
 alias localai="$HOME/tools/opencode-local/start-opencode-local.sh"
 alias protonmail="open ~/Applications/Proton\ Mail.app"
 
-# Friday AI Assistant with user-specific config
-alias friday='friday-wrapper'
-
 if [ -d "$HOME/.ai/bin" ]; then
   export PATH="$HOME/.ai/bin:$PATH"
 fi
