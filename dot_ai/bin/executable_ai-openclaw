@@ -4,9 +4,11 @@ set -euo pipefail
 AI_HOME="${AI_HOME:-$HOME/.ai}"
 AI_OMLX_HOST="${AI_OMLX_HOST:-127.0.0.1}"
 AI_OMLX_PORT="${AI_OMLX_PORT:-11435}"
+AI_OMLX_TIMEOUT="${AI_OMLX_TIMEOUT:-1}"
 AI_OPENCLAW_CONTEXT_WINDOW="${AI_OPENCLAW_CONTEXT_WINDOW:-128000}"
 AI_OPENCLAW_MAX_TOKENS="${AI_OPENCLAW_MAX_TOKENS:-8192}"
 PRIMARY_MANIFEST="${AI_MANIFEST_FILE:-$AI_HOME/manifest.txt}"
+OPENCLAW_CONFIG_FILE="${OPENCLAW_CONFIG_PATH:-$HOME/.openclaw/openclaw.json}"
 
 usage() {
   cat <<'EOF'
@@ -26,17 +28,18 @@ require_cmd() {
 }
 
 detect_model_from_server() {
-  python3 - "$AI_OMLX_HOST" "$AI_OMLX_PORT" <<'PY'
+  python3 - "$AI_OMLX_HOST" "$AI_OMLX_PORT" "$AI_OMLX_TIMEOUT" <<'PY'
 import json
 import sys
 import urllib.request
 
 host = sys.argv[1]
 port = sys.argv[2]
+timeout = float(sys.argv[3])
 url = f"http://{host}:{port}/v1/models"
 
 try:
-    with urllib.request.urlopen(url, timeout=5) as response:
+    with urllib.request.urlopen(url, timeout=timeout) as response:
         payload = json.load(response)
 except Exception:
     raise SystemExit(1)
@@ -52,17 +55,18 @@ PY
 }
 
 list_models_from_server() {
-  python3 - "$AI_OMLX_HOST" "$AI_OMLX_PORT" <<'PY'
+  python3 - "$AI_OMLX_HOST" "$AI_OMLX_PORT" "$AI_OMLX_TIMEOUT" <<'PY'
 import json
 import sys
 import urllib.request
 
 host = sys.argv[1]
 port = sys.argv[2]
+timeout = float(sys.argv[3])
 url = f"http://{host}:{port}/v1/models"
 
 try:
-    with urllib.request.urlopen(url, timeout=5) as response:
+    with urllib.request.urlopen(url, timeout=timeout) as response:
         payload = json.load(response)
 except Exception:
     raise SystemExit(1)
@@ -80,17 +84,18 @@ PY
 }
 
 server_status() {
-  python3 - "$AI_OMLX_HOST" "$AI_OMLX_PORT" <<'PY'
+  python3 - "$AI_OMLX_HOST" "$AI_OMLX_PORT" "$AI_OMLX_TIMEOUT" <<'PY'
 import json
 import sys
 import urllib.request
 
 host = sys.argv[1]
 port = sys.argv[2]
+timeout = float(sys.argv[3])
 url = f"http://{host}:{port}/v1/models"
 
 try:
-    with urllib.request.urlopen(url, timeout=5) as response:
+    with urllib.request.urlopen(url, timeout=timeout) as response:
         payload = json.load(response)
 except Exception:
     print("unreachable")
@@ -103,6 +108,46 @@ for item in payload.get("data", []):
         raise SystemExit(0)
 
 print("empty")
+PY
+}
+
+config_summary() {
+  python3 - "$OPENCLAW_CONFIG_FILE" <<'PY'
+import json
+import os
+import sys
+
+path = os.path.expanduser(sys.argv[1])
+
+summary = {
+    "exists": False,
+    "path": path,
+    "primary": "",
+    "base_url": "",
+    "configured_models": [],
+}
+
+try:
+    with open(path, encoding="utf-8") as handle:
+        data = json.load(handle)
+except OSError:
+    print(json.dumps(summary))
+    raise SystemExit(0)
+
+summary["exists"] = True
+summary["primary"] = (
+    data.get("agents", {})
+    .get("defaults", {})
+    .get("model", {})
+    .get("primary", "")
+)
+provider = data.get("models", {}).get("providers", {}).get("omlx", {})
+summary["base_url"] = provider.get("baseUrl", "")
+summary["configured_models"] = [
+    item.get("id", "") for item in provider.get("models", []) if item.get("id")
+]
+
+print(json.dumps(summary))
 PY
 }
 
@@ -199,27 +244,36 @@ PY
 }
 
 show_status() {
-  require_cmd openclaw
   local live_models
   local live_status
+  local summary_json
   live_models="$(list_models_from_server || true)"
   live_status="$(server_status)"
+  summary_json="$(config_summary)"
 
-  printf 'Config file: '
-  openclaw config file
-  printf 'Primary model: '
-  openclaw config get agents.defaults.model.primary || true
-  if [ "$live_status" = "models" ] && [ -n "$live_models" ]; then
-    printf 'Live oMLX models:\n%s\n' "$live_models"
-  elif [ "$live_status" = "empty" ]; then
-    printf 'Live oMLX models: none reported by %s:%s\n' "$AI_OMLX_HOST" "$AI_OMLX_PORT"
-  else
-    printf 'Live oMLX models: server unreachable at %s:%s\n' "$AI_OMLX_HOST" "$AI_OMLX_PORT"
-  fi
-  printf 'Provider config:\n'
-  openclaw config get models.providers.omlx --json || true
-  printf 'Known oMLX models:\n'
-  openclaw models list --provider omlx || true
+  python3 - "$summary_json" "$live_status" "$live_models" <<'PY'
+import json
+import sys
+
+summary = json.loads(sys.argv[1])
+live_status = sys.argv[2]
+live_models = [line for line in sys.argv[3].splitlines() if line.strip()]
+
+print(f"Config: {summary['path']}")
+print(f"Primary model: {summary['primary'] or 'none'}")
+print(f"Endpoint: {summary['base_url'] or 'none'}")
+
+if live_status == "models" and live_models:
+    print(f"Live models: {', '.join(live_models)}")
+elif live_status == "empty":
+    print("Live models: none")
+else:
+    print("Live models: unreachable")
+
+configured_models = [item for item in summary.get("configured_models", []) if item]
+if configured_models:
+    print(f"Configured models: {', '.join(configured_models)}")
+PY
 }
 
 command="${1:-}"

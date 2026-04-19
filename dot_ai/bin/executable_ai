@@ -21,28 +21,62 @@ EOF
 }
 
 show_status() {
-  local local_models
+  local model_dir
+  local local_entries
+  local serve_summary
+  local openclaw_summary
+  local manifest_entries
 
-  printf 'AI home: %s\n' "$AI_HOME"
-  printf 'Model dir: '
-  "$AI_HOME/bin/ai-model" path
+  model_dir="$("$AI_HOME/bin/ai-model" path)"
+  local_entries="$("$AI_HOME/bin/ai-model" list || true)"
+  serve_summary="$("$AI_HOME/bin/ai-serve" status)"
+  openclaw_summary="$("$AI_HOME/bin/ai-openclaw" status)"
+  manifest_entries="$("$AI_HOME/bin/ai-model" manifest 2>/dev/null || true)"
 
-  local_models="$("$AI_HOME/bin/ai-model" list || true)"
-  if [ -n "$local_models" ]; then
-    printf 'Local models:\n%s\n' "$local_models"
-  else
-    printf 'Local models: none\n'
-  fi
+  python3 - "$model_dir" "$local_entries" "$serve_summary" "$openclaw_summary" "$manifest_entries" <<'PY'
+import sys
 
-  printf '\noMLX:\n'
-  "$AI_HOME/bin/ai-serve" status
+model_dir, local_entries, serve_summary, openclaw_summary, manifest_entries = sys.argv[1:6]
 
-  printf '\nOpenClaw:\n'
-  if command -v openclaw >/dev/null 2>&1; then
-    "$AI_HOME/bin/ai-openclaw" status
-  else
-    printf 'OpenClaw is not installed. Run %s/install.sh\n' "$AI_HOME"
-  fi
+def lines(value: str) -> list[str]:
+    return [line.strip() for line in value.splitlines() if line.strip()]
+
+local_list = lines(local_entries)
+serve_lines = lines(serve_summary)
+openclaw_lines = lines(openclaw_summary)
+manifest_list = [line for line in lines(manifest_entries) if not line.startswith("# ")]
+
+def lookup(prefix: str, items: list[str], default: str = "") -> str:
+    for item in items:
+        if item.startswith(prefix):
+            return item[len(prefix):].strip()
+    return default
+
+server = lookup("Server:", serve_lines)
+api = lookup("API:", serve_lines)
+available = "none"
+if "Available models:" in serve_lines:
+    index = serve_lines.index("Available models:")
+    models = [line for line in serve_lines[index + 1 :] if ":" not in line]
+    if models:
+        available = ", ".join(models)
+if available == "No models reported by oMLX.":
+    available = "none"
+
+primary = lookup("Primary model:", openclaw_lines, "none")
+endpoint = lookup("Endpoint:", openclaw_lines, "none")
+live = lookup("Live models:", openclaw_lines, "unknown")
+
+print(f"Server: {api} ({server or 'unknown'})")
+print(f"Configured model: {primary}")
+print(f"Endpoint: {endpoint}")
+print(f"Live models: {live}")
+print(f"Available: {available}")
+print(f"Local: {', '.join(local_list) if local_list else 'none'}")
+if manifest_list:
+    print(f"Manifest: {', '.join(manifest_list)}")
+print(f"Model dir: {model_dir}")
+PY
 }
 
 command="${1:-}"
