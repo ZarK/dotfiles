@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+AI_HOME="${AI_HOME:-$HOME/.ai}"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  ai download <huggingface-url-or-repo> [target-name]
+  ai status
+  ai model <args...>
+  ai serve <args...>
+  ai openclaw <args...>
+
+Examples:
+  ai download https://huggingface.co/Brooooooklyn/Qwen3.6-35B-A3B-UD-Q8_K_XL-mlx
+  ai status
+  ai serve status
+  ai openclaw configure
+EOF
+}
+
+show_status() {
+  local local_models
+
+  printf 'AI home: %s\n' "$AI_HOME"
+  printf 'Model dir: '
+  "$AI_HOME/bin/ai-model" path
+
+  local_models="$("$AI_HOME/bin/ai-model" list || true)"
+  if [ -n "$local_models" ]; then
+    printf 'Local models:\n%s\n' "$local_models"
+  else
+    printf 'Local models: none\n'
+  fi
+
+  printf '\noMLX:\n'
+  "$AI_HOME/bin/ai-serve" status
+
+  printf '\nOpenClaw:\n'
+  if command -v openclaw >/dev/null 2>&1; then
+    "$AI_HOME/bin/ai-openclaw" status
+  else
+    printf 'OpenClaw is not installed. Run %s/install.sh\n' "$AI_HOME"
+  fi
+}
+
+command="${1:-}"
+case "$command" in
+  download)
+    shift
+    exec "$AI_HOME/bin/ai-model" download "$@"
+    ;;
+  status)
+    show_status
+    ;;
+  model)
+    shift
+    exec "$AI_HOME/bin/ai-model" "$@"
+    ;;
+  serve)
+    shift
+    exec "$AI_HOME/bin/ai-serve" "$@"
+    ;;
+  openclaw)
+    shift
+    exec "$AI_HOME/bin/ai-openclaw" "$@"
+    ;;
+  *)
+    usage >&2
+    exit 1
+    ;;
+esac
