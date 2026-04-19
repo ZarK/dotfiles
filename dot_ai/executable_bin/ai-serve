@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+AI_MODEL_DIR="${AI_MODEL_DIR:-$HOME/models}"
+AI_OMLX_HOST="${AI_OMLX_HOST:-127.0.0.1}"
+AI_OMLX_PORT="${AI_OMLX_PORT:-8000}"
+AI_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/ai"
+PID_FILE="$AI_STATE_DIR/omlx.pid"
+LOG_DIR="$AI_STATE_DIR/logs"
+LOG_FILE="$LOG_DIR/omlx.log"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  ai-serve start
+  ai-serve stop
+  ai-serve restart
+  ai-serve status
+  ai-serve models
+  ai-serve logs
+  ai-serve run
+EOF
+}
+
+require_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    printf 'Missing required command: %s\n' "$1" >&2
+    exit 1
+  fi
+}
+
+server_url() {
+  printf 'http://%s:%s' "$AI_OMLX_HOST" "$AI_OMLX_PORT"
+}
+
+read_pid() {
+  [ -f "$PID_FILE" ] || return 1
+  tr -d '[:space:]' < "$PID_FILE"
+}
+
+is_running() {
+  local pid
+  pid="$(read_pid)" || return 1
+  [ -n "$pid" ] || return 1
+  kill -0 "$pid" 2>/dev/null
+}
+
+start_server() {
+  require_cmd omlx
+  mkdir -p "$AI_MODEL_DIR" "$LOG_DIR"
+
+  if is_running; then
+    printf 'oMLX is already running with pid %s\n' "$(read_pid)"
+    return 0
+  fi
+
+  nohup omlx serve --model-dir "$AI_MODEL_DIR" --port "$AI_OMLX_PORT" >> "$LOG_FILE" 2>&1 &
+  echo "$!" > "$PID_FILE"
+  sleep 2
+
+  if is_running; then
+    printf 'Started oMLX on %s using models from %s\n' "$(server_url)" "$AI_MODEL_DIR"
+  else
+    printf 'oMLX did not stay running. Check %s\n' "$LOG_FILE" >&2
+    exit 1
+  fi
+}
+
+stop_server() {
+  local pid
+
+  if ! is_running; then
+    rm -f "$PID_FILE"
+    printf 'oMLX is not running.\n'
+    return 0
+  fi
+
+  pid="$(read_pid)"
+  kill "$pid"
+
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    if ! kill -0 "$pid" 2>/dev/null; then
+      rm -f "$PID_FILE"
+      printf 'Stopped oMLX.\n'
+      return 0
+    fi
+    sleep 1
+  done
+
+  kill -9 "$pid" 2>/dev/null || true
+  rm -f "$PID_FILE"
+  printf 'Forced oMLX to stop.\n'
+}
+
+show_models() {
+  require_cmd python3
+  python3 - "$(server_url)/v1/models" <<'PY'
+import json
+import sys
+import urllib.request
+
+url = sys.argv[1]
+with urllib.request.urlopen(url, timeout=5) as response:
+    payload = json.load(response)
+
+for item in payload.get("data", []):
+    model_id = item.get("id")
+    if model_id:
+        print(model_id)
+PY
+}
+
+show_status() {
+  local pid="-"
+  local api_status="unreachable"
+
+  if is_running; then
+    pid="$(read_pid)"
+  fi
+
+  if curl -fsS "$(server_url)/v1/models" >/dev/null 2>&1; then
+    api_status="ready"
+  fi
+
+  printf 'Server: %s\n' "$(server_url)"
+  printf 'Models: %s\n' "$AI_MODEL_DIR"
+  printf 'PID: %s\n' "$pid"
+  printf 'API: %s\n' "$api_status"
+  printf 'Log: %s\n' "$LOG_FILE"
+
+  if [ "$api_status" = "ready" ]; then
+    printf 'Available models:\n'
+    show_models
+  fi
+}
+
+command="${1:-}"
+case "$command" in
+  start)
+    start_server
+    ;;
+  stop)
+    stop_server
+    ;;
+  restart)
+    stop_server
+    start_server
+    ;;
+  status)
+    show_status
+    ;;
+  models)
+    show_models
+    ;;
+  logs)
+    mkdir -p "$LOG_DIR"
+    touch "$LOG_FILE"
+    tail -f "$LOG_FILE"
+    ;;
+  run)
+    require_cmd omlx
+    mkdir -p "$AI_MODEL_DIR" "$LOG_DIR"
+    exec omlx serve --model-dir "$AI_MODEL_DIR" --port "$AI_OMLX_PORT"
+    ;;
+  *)
+    usage >&2
+    exit 1
+    ;;
+esac

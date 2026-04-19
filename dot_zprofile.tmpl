@@ -10,3 +10,11 @@ export PATH="$HOME{{ .chezmoi.pathSeparator }}.codeium{{ .chezmoi.pathSeparator 
 
 # OrbStack (load silently if present)
 source "$HOME{{ .chezmoi.pathSeparator }}.orbstack{{ .chezmoi.pathSeparator }}shell{{ .chezmoi.pathSeparator }}init.zsh" 2>{{ .chezmoi.pathSeparator }}dev{{ .chezmoi.pathSeparator }}null || true
+
+# OpenCode CLI
+_opencode_bin="$HOME{{ .chezmoi.pathSeparator }}.opencode{{ .chezmoi.pathSeparator }}bin"
+case ":$PATH:" in
+  *":${_opencode_bin}:"*) ;;
+  *) export PATH="${_opencode_bin}:$PATH" ;;
+esac
+unset _opencode_bin

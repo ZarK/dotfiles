@@ -109,7 +109,7 @@ This provides the `chezmoi` command, which you will use to pull down your dotfil
 
 ## 8. Sign in to Mac App Store
 
-Open the **Mac App Store** app and sign in with your Apple ID. This enables automatic installation of Mac App Store apps during the setup process.
+Open the **Mac App Store** app and sign in with your Apple ID before running `chezmoi init --apply`. This lets Homebrew Bundle attempt the Mac App Store installs in your Brewfile. If they are skipped or fail, rerun `brew bundle --file ~/.local/share/chezmoi/Brewfile` after signing in.
 
 ## 9. Pull and Apply Dotfiles with Chezmoi (via SSH)
 
@@ -139,16 +139,15 @@ You can now select the Nerd Fonts in Warp settings.
 
 ---
 
-## 11. Mac App Store Apps (Automatic Installation)
+## 11. Mac App Store Apps
 
-The following apps are automatically installed from the Mac App Store during setup (provided you completed step 8):
+The following Mac App Store apps are attempted during the `brew bundle` step (provided you completed step 8):
 
 - **Tailscale** (1475387142): VPN and network mesh tool
 - **Gifski** (1351639930): GIF converter and animator  
-- **SimpleLogin** (1494359858): Email aliasing service
-- **Screens 5** (1663070235): VNC/remote desktop client
+- **Screens 5** (1663047912): VNC/remote desktop client
 
-These apps are installed via the `mas` command line tool during the `brew bundle` step.
+These apps are handled by the `mas` command line tool during the `brew bundle` step. On current macOS versions, `mas account` is not a reliable health check, and installs may still require you to be signed in to App Store.app and to rerun `brew bundle --file ~/.local/share/chezmoi/Brewfile` afterward.
 
 
 That’s it! 🎉 When your Mac comes back up, you should have your full development environment ready to go:

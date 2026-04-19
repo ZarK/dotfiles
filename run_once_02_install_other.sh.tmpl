@@ -9,4 +9,24 @@ else
   echo "Bun is already installed."
 fi
 
-# Add other non-Homebrew tool installations here as needed
+export BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# 2. Install OpenClaw CLI (prefer Bun, fall back to npm)
+if command -v bun &>/dev/null; then
+  if ! command -v openclaw &>/dev/null; then
+    echo "Installing OpenClaw CLI via Bun..."
+    bun add --global openclaw@latest
+  else
+    echo "OpenClaw CLI is already installed."
+  fi
+elif command -v npm &>/dev/null; then
+  if ! command -v openclaw &>/dev/null; then
+    echo "Installing OpenClaw CLI via npm fallback..."
+    npm install -g openclaw@latest
+  else
+    echo "OpenClaw CLI is already installed."
+  fi
+else
+  echo "Skipping OpenClaw install because neither Bun nor npm is available yet."
+fi

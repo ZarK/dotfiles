@@ -4,6 +4,14 @@ HISTSIZE=100000
 SAVEHIST=$HISTSIZE
 setopt INC_APPEND_HISTORY SHARE_HISTORY HIST_IGNORE_DUPS
 
+if [[ "$PWD" != "$(pwd -P)" ]]; then
+  builtin cd -qP . 2>/dev/null
+fi
+
+if [[ -L /usr/local/share/zsh/site-functions/_mdatp && ! -e /usr/local/share/zsh/site-functions/_mdatp ]]; then
+  fpath=(${fpath:#/usr/local/share/zsh/site-functions})
+fi
+
 # Prompt & helpers
 eval "$(starship init zsh)"
 eval "$(zoxide init zsh)"
@@ -16,6 +24,7 @@ eval "$(zoxide init zsh)"
 alias ls='eza -lah --group-directories-first'
 alias tailscale='/Applications/Tailscale.app/Contents/MacOS/Tailscale'
 alias edit='RETURN_DIR=$(pwd) && nano ~/.zshrc && cd "$RETURN_DIR" && source ~/.zshrc'
+alias czkawka_cli='~/Applications/czkawka_cli'
 
 # Developer Tools
 alias code="open ~/Applications/Visual\ Studio\ Code.app"
@@ -35,7 +44,15 @@ alias raycast="open ~/Applications/Raycast.app"
 
 # Utilities
 alias keka="open ~/Applications/Keka.app"
+alias localai="$HOME/tools/opencode-local/start-opencode-local.sh"
 alias protonmail="open ~/Applications/Proton\ Mail.app"
+
+# Friday AI Assistant with user-specific config
+alias friday='friday-wrapper'
+
+if [ -d "$HOME/.ai/bin" ]; then
+  export PATH="$HOME/.ai/bin:$PATH"
+fi
 
 # Dynamic content added by installers
 if [ -s "$HOME/.bun/_bun" ]; then
@@ -57,3 +74,29 @@ fi
 
 # Exports
 export EDITOR=nano
+
+# Local, untracked overrides (API keys, machine-specific stuff)
+if [ -f "$HOME/.zshrc.local" ]; then
+  source "$HOME/.zshrc.local"
+fi
+
+# dotnet
+export DOTNET_ROOT=$HOME/.asdf/installs/dotnet/10.0.101
+
+# Added by Antigravity
+export PATH="/Users/tjalve/.antigravity/antigravity/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$PATH:/Users/tjalve/.dotnet/tools"
+export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
+
+# cubic
+export PATH=/Users/tjalve/.cubic/bin:$PATH
+
+# Added by Windsurf - Next
+export PATH="/Users/tjalve/.codeium/windsurf/bin:$PATH"
+
+# Added by git-ai installer on Sun Mar  8 11:11:30 CET 2026
+export PATH="/Users/tjalve/.git-ai/bin:$PATH"
+
+# opencode
+export PATH=/Users/tjalve/.opencode/bin:$PATH

@@ -1,0 +1,14 @@
+# Local overrides
+manifest.local.txt
+
+# Temporary or accidental local model storage
+models/
+*.gguf
+*.bin
+*.safetensors
+
+# Runtime artifacts
+.state/
+logs/
+tmp/
+*.pid

@@ -1,0 +1,173 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+AI_HOME="${AI_HOME:-$HOME/.ai}"
+AI_OMLX_HOST="${AI_OMLX_HOST:-127.0.0.1}"
+AI_OMLX_PORT="${AI_OMLX_PORT:-8000}"
+AI_OPENCLAW_CONTEXT_WINDOW="${AI_OPENCLAW_CONTEXT_WINDOW:-128000}"
+AI_OPENCLAW_MAX_TOKENS="${AI_OPENCLAW_MAX_TOKENS:-8192}"
+PRIMARY_MANIFEST="${AI_MANIFEST_FILE:-$AI_HOME/manifest.txt}"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  ai-openclaw configure [model-id]
+  ai-openclaw status
+  ai-openclaw doctor
+  ai-openclaw dashboard
+EOF
+}
+
+require_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    printf 'Missing required command: %s\n' "$1" >&2
+    exit 1
+  fi
+}
+
+detect_model_from_server() {
+  python3 - "$AI_OMLX_HOST" "$AI_OMLX_PORT" <<'PY'
+import json
+import sys
+import urllib.request
+
+host = sys.argv[1]
+port = sys.argv[2]
+url = f"http://{host}:{port}/v1/models"
+
+try:
+    with urllib.request.urlopen(url, timeout=5) as response:
+        payload = json.load(response)
+except Exception:
+    raise SystemExit(1)
+
+for item in payload.get("data", []):
+    model_id = item.get("id")
+    if model_id:
+        print(model_id)
+        break
+else:
+    raise SystemExit(1)
+PY
+}
+
+detect_model_from_manifest() {
+  python3 - "$PRIMARY_MANIFEST" <<'PY'
+import sys
+
+manifest = sys.argv[1]
+
+try:
+    with open(manifest, encoding="utf-8") as handle:
+        for raw_line in handle:
+            line = raw_line.split("#", 1)[0].strip()
+            if not line:
+                continue
+            print(line.rsplit("/", 1)[-1])
+            break
+        else:
+            raise SystemExit(1)
+except OSError:
+    raise SystemExit(1)
+PY
+}
+
+configure_openclaw() {
+  require_cmd openclaw
+
+  local model_id="${1:-}"
+  if [ -z "$model_id" ]; then
+    model_id="$(detect_model_from_server || true)"
+  fi
+  if [ -z "$model_id" ]; then
+    model_id="$(detect_model_from_manifest || true)"
+  fi
+
+  if [ -z "$model_id" ]; then
+    printf 'Could not detect a model id. Start oMLX or pass a model id explicitly.\n' >&2
+    exit 1
+  fi
+
+  local batch_json
+  batch_json="$(python3 - "$model_id" "$AI_OMLX_HOST" "$AI_OMLX_PORT" "$AI_OPENCLAW_CONTEXT_WINDOW" "$AI_OPENCLAW_MAX_TOKENS" <<'PY'
+import json
+import sys
+
+model_id = sys.argv[1]
+host = sys.argv[2]
+port = sys.argv[3]
+context_window = int(sys.argv[4])
+max_tokens = int(sys.argv[5])
+
+provider = {
+    "baseUrl": f"http://{host}:{port}/v1",
+    "apiKey": "omlx",
+    "api": "openai-responses",
+    "models": [
+        {
+            "id": model_id,
+            "name": model_id,
+            "reasoning": False,
+            "input": ["text"],
+            "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+            },
+            "contextWindow": context_window,
+            "maxTokens": max_tokens,
+        }
+    ],
+}
+
+operations = [
+    {"path": "models.mode", "value": "merge"},
+    {"path": "models.providers.omlx", "value": provider},
+    {"path": "agents.defaults.model.primary", "value": f"omlx/{model_id}"},
+]
+
+print(json.dumps(operations))
+PY
+ )"
+
+  openclaw config set --batch-json "$batch_json" --dry-run --json >/dev/null
+  openclaw config set --batch-json "$batch_json"
+  openclaw config validate >/dev/null
+  printf 'Configured OpenClaw to use oMLX model omlx/%s\n' "$model_id"
+}
+
+show_status() {
+  require_cmd openclaw
+  printf 'Config file: '
+  openclaw config file
+  printf 'Primary model: '
+  openclaw config get agents.defaults.model.primary || true
+  printf 'Provider config:\n'
+  openclaw config get models.providers.omlx --json || true
+  printf 'Known oMLX models:\n'
+  openclaw models list --provider omlx || true
+}
+
+command="${1:-}"
+case "$command" in
+  configure)
+    shift
+    configure_openclaw "${1:-}"
+    ;;
+  status)
+    show_status
+    ;;
+  doctor)
+    require_cmd openclaw
+    openclaw doctor
+    ;;
+  dashboard)
+    require_cmd openclaw
+    openclaw dashboard
+    ;;
+  *)
+    usage >&2
+    exit 1
+    ;;
+esac

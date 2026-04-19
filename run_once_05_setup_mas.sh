@@ -1,14 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+BREWFILE="$HOME/.local/share/chezmoi/Brewfile"
+
 if ! command -v mas &>/dev/null; then
-  echo "mas not found"
-  exit 1
+  echo "mas is not installed yet; Mac App Store apps were not checked."
+  exit 0
 fi
 
 if mas search "Tailscale" | grep -q "1475387142"; then
-  echo "Mac App Store connectivity verified"
+  cat <<EOF
+Mac App Store connectivity looks OK.
+Mac App Store apps are attempted during `brew bundle`, not by this script.
+If any MAS apps are still missing, rerun:
+  brew bundle --file="$BREWFILE"
+EOF
 else
-  echo "Mac App Store not accessible - ensure you're signed in to the Mac App Store app"
+  cat <<EOF
+Mac App Store apps were not installed.
+Sign in to App Store.app, then rerun:
+  brew bundle --file="$BREWFILE"
+EOF
 fi
-

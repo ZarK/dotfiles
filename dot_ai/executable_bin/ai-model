@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+AI_HOME="${AI_HOME:-$HOME/.ai}"
+AI_MODEL_DIR="${AI_MODEL_DIR:-$HOME/models}"
+PRIMARY_MANIFEST="${AI_MANIFEST_FILE:-$AI_HOME/manifest.txt}"
+LOCAL_MANIFEST="$AI_HOME/manifest.local.txt"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  ai-model download <huggingface-repo> [target-name]
+  ai-model download --manifest
+  ai-model list
+  ai-model path
+  ai-model manifest
+
+Examples:
+  ai-model download mlx-community/Hermes-4-70B-MLX-4bit
+  ai-model download --manifest
+EOF
+}
+
+require_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    printf 'Missing required command: %s\n' "$1" >&2
+    exit 1
+  fi
+}
+
+trim() {
+  python3 - "$1" <<'PY'
+import sys
+print(sys.argv[1].strip())
+PY
+}
+
+download_repo() {
+  local repo="$1"
+  local target_name="${2:-${repo##*/}}"
+  local target_dir="$AI_MODEL_DIR/$target_name"
+
+  require_cmd uv
+  mkdir -p "$AI_MODEL_DIR"
+  printf 'Downloading %s -> %s\n' "$repo" "$target_dir"
+  uv tool run --from huggingface_hub hf download "$repo" --local-dir "$target_dir"
+}
+
+download_manifest_file() {
+  local manifest_file="$1"
+  [ -f "$manifest_file" ] || return 0
+
+  while IFS= read -r raw_line || [ -n "$raw_line" ]; do
+    local line="${raw_line%%#*}"
+    line="$(trim "$line")"
+    [ -n "$line" ] || continue
+    download_repo "$line"
+  done < "$manifest_file"
+}
+
+print_manifest() {
+  local found=0
+
+  for manifest_file in "$PRIMARY_MANIFEST" "$LOCAL_MANIFEST"; do
+    if [ -f "$manifest_file" ]; then
+      found=1
+      printf '# %s\n' "$manifest_file"
+      sed '/^[[:space:]]*#/d;/^[[:space:]]*$/d' "$manifest_file"
+    fi
+  done
+
+  if [ "$found" -eq 0 ]; then
+    printf 'No manifest found. Expected %s\n' "$PRIMARY_MANIFEST" >&2
+    exit 1
+  fi
+}
+
+list_models() {
+  mkdir -p "$AI_MODEL_DIR"
+  python3 - "$AI_MODEL_DIR" <<'PY'
+import os
+import sys
+
+root = sys.argv[1]
+entries = [name for name in sorted(os.listdir(root)) if os.path.isdir(os.path.join(root, name))]
+for entry in entries:
+    print(entry)
+PY
+}
+
+command="${1:-}"
+case "$command" in
+  download)
+    shift
+    case "${1:-}" in
+      --manifest)
+        download_manifest_file "$PRIMARY_MANIFEST"
+        download_manifest_file "$LOCAL_MANIFEST"
+        ;;
+      "")
+        usage >&2
+        exit 1
+        ;;
+      *)
+        repo="$1"
+        target_name="${2:-}"
+        download_repo "$repo" "$target_name"
+        ;;
+    esac
+    ;;
+  list)
+    list_models
+    ;;
+  path)
+    printf '%s\n' "$AI_MODEL_DIR"
+    ;;
+  manifest)
+    print_manifest
+    ;;
+  *)
+    usage >&2
+    exit 1
+    ;;
+esac

@@ -1,0 +1,4 @@
+# One Hugging Face repo per line.
+# ai-model download --manifest reads this file and stores models in ~/models.
+
+mlx-community/Hermes-4-70B-MLX-4bit
