@@ -5,18 +5,27 @@ AI_HOME="${AI_HOME:-$HOME/.ai}"
 
 usage() {
   cat <<'EOF'
-Usage:
-  ai download <huggingface-url-or-repo> [target-name]
+Local AI commands:
+  ai                     Show current status
   ai status
-  ai model <args...>
+  ai start
+  ai stop
+  ai restart
+  ai models
+  ai logs
+  ai configure [model-id]
+  ai download <huggingface-url-or-repo> [target-name]
+
+Advanced:
   ai serve <args...>
-  ai openclaw <args...>
+  ai model <args...>
 
 Examples:
-  ai download https://huggingface.co/Brooooooklyn/Qwen3.6-35B-A3B-UD-Q8_K_XL-mlx
   ai status
-  ai serve status
-  ai openclaw configure
+  ai start
+  ai models
+  ai configure
+  ai download https://huggingface.co/Brooooooklyn/Qwen3.6-35B-A3B-UD-Q8_K_XL-mlx
 EOF
 }
 
@@ -52,41 +61,101 @@ def lookup(prefix: str, items: list[str], default: str = "") -> str:
             return item[len(prefix):].strip()
     return default
 
-server = lookup("Server:", serve_lines)
-api = lookup("API:", serve_lines)
-available = "none"
-if "Available models:" in serve_lines:
-    index = serve_lines.index("Available models:")
-    models = [line for line in serve_lines[index + 1 :] if ":" not in line]
-    if models:
-        available = ", ".join(models)
-if available == "No models reported by oMLX.":
-    available = "none"
+state = lookup("State:", serve_lines, "unknown")
+endpoint = lookup("Endpoint:", serve_lines, "none")
+served = lookup("Served models:", serve_lines, "unknown")
 
 primary = lookup("Primary model:", openclaw_lines, "none")
-endpoint = lookup("Endpoint:", openclaw_lines, "none")
-live = lookup("Live models:", openclaw_lines, "unknown")
+configured_endpoint = lookup("Endpoint:", openclaw_lines, "none")
+live = lookup("Live models:", openclaw_lines, served)
 
-print(f"Server: {api} ({server or 'unknown'})")
+if live == "unreachable":
+    live = served
+if state != "running" and live == "unreachable":
+    live = "none"
+
+print(f"Server: {state} ({endpoint})")
 print(f"Configured model: {primary}")
-print(f"Endpoint: {endpoint}")
-print(f"Live models: {live}")
-print(f"Available: {available}")
+print(f"OpenClaw endpoint: {configured_endpoint}")
+print(f"Served: {live}")
 print(f"Local: {', '.join(local_list) if local_list else 'none'}")
 if manifest_list:
     print(f"Manifest: {', '.join(manifest_list)}")
 print(f"Model dir: {model_dir}")
+if state != "running":
+    print("Next: ai start")
+elif primary == "none":
+    print("Next: ai configure")
+PY
+}
+
+show_models() {
+  local local_entries
+  local served_entries
+  local manifest_entries
+
+  local_entries="$($AI_HOME/bin/ai-model list || true)"
+  served_entries="$($AI_HOME/bin/ai-serve models 2>&1 || true)"
+  manifest_entries="$($AI_HOME/bin/ai-model manifest 2>/dev/null || true)"
+
+  python3 - "$local_entries" "$served_entries" "$manifest_entries" <<'PY'
+import sys
+
+local_entries, served_entries, manifest_entries = sys.argv[1:4]
+
+def clean(value: str) -> list[str]:
+    return [line.strip() for line in value.splitlines() if line.strip()]
+
+local_list = clean(local_entries)
+served_list = clean(served_entries)
+manifest_list = [line for line in clean(manifest_entries) if not line.startswith("# ")]
+next_step = ""
+
+if served_list and served_list[0].startswith("oMLX is not running at "):
+    served_list = []
+    next_step = "ai start"
+elif served_list == ["No models are currently served."]:
+    served_list = []
+
+print(f"Served: {', '.join(served_list) if served_list else 'none'}")
+print(f"Local: {', '.join(local_list) if local_list else 'none'}")
+if manifest_list:
+    print(f"Manifest: {', '.join(manifest_list)}")
+if next_step:
+    print(f"Next: {next_step}")
 PY
 }
 
 command="${1:-}"
 case "$command" in
+  "")
+    show_status
+    ;;
   download)
     shift
     exec "$AI_HOME/bin/ai-model" download "$@"
     ;;
   status)
     show_status
+    ;;
+  start)
+    exec "$AI_HOME/bin/ai-serve" start
+    ;;
+  stop)
+    exec "$AI_HOME/bin/ai-serve" stop
+    ;;
+  restart)
+    exec "$AI_HOME/bin/ai-serve" restart
+    ;;
+  models)
+    show_models
+    ;;
+  logs)
+    exec "$AI_HOME/bin/ai-serve" logs
+    ;;
+  configure)
+    shift
+    exec "$AI_HOME/bin/ai-openclaw" configure "$@"
     ;;
   model)
     shift
@@ -99,6 +168,9 @@ case "$command" in
   openclaw)
     shift
     exec "$AI_HOME/bin/ai-openclaw" "$@"
+    ;;
+  help|--help|-h)
+    usage
     ;;
   *)
     usage >&2

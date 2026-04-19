@@ -4,6 +4,7 @@ set -euo pipefail
 AI_MODEL_DIR="${AI_MODEL_DIR:-$HOME/models}"
 AI_OMLX_HOST="${AI_OMLX_HOST:-127.0.0.1}"
 AI_OMLX_PORT="${AI_OMLX_PORT:-11435}"
+AI_OMLX_TIMEOUT="${AI_OMLX_TIMEOUT:-1}"
 AI_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/ai"
 PID_FILE="$AI_STATE_DIR/omlx.pid"
 LOG_DIR="$AI_STATE_DIR/logs"
@@ -12,13 +13,20 @@ LOG_FILE="$LOG_DIR/omlx.log"
 usage() {
   cat <<'EOF'
 Usage:
-  ai-serve start
-  ai-serve stop
-  ai-serve restart
-  ai-serve status
-  ai-serve models
-  ai-serve logs
-  ai-serve run
+  ai serve start
+  ai serve stop
+  ai serve restart
+  ai serve status
+  ai serve models
+  ai serve logs
+  ai serve run
+
+Shorthand:
+  ai start
+  ai stop
+  ai restart
+  ai models
+  ai logs
 EOF
 }
 
@@ -31,6 +39,36 @@ require_cmd() {
 
 server_url() {
   printf 'http://%s:%s' "$AI_OMLX_HOST" "$AI_OMLX_PORT"
+}
+
+fetch_server_models() {
+  require_cmd python3
+  python3 - "$AI_OMLX_HOST" "$AI_OMLX_PORT" "$AI_OMLX_TIMEOUT" <<'PY'
+import json
+import sys
+import urllib.request
+
+host = sys.argv[1]
+port = sys.argv[2]
+timeout = float(sys.argv[3])
+url = f"http://{host}:{port}/v1/models"
+
+try:
+    with urllib.request.urlopen(url, timeout=timeout) as response:
+        payload = json.load(response)
+except Exception:
+    print("unreachable")
+    raise SystemExit(0)
+
+models = [item.get("id") for item in payload.get("data", []) if item.get("id")]
+if not models:
+    print("empty")
+    raise SystemExit(0)
+
+print("models")
+for model in models:
+    print(model)
+PY
 }
 
 read_pid() {
@@ -130,53 +168,74 @@ stop_server() {
 }
 
 show_models() {
-  require_cmd python3
-  python3 - "$(server_url)/v1/models" <<'PY'
-import json
-import sys
-import urllib.request
+  local probe_output
+  local state
 
-url = sys.argv[1]
-with urllib.request.urlopen(url, timeout=5) as response:
-    payload = json.load(response)
+  probe_output="$(fetch_server_models)"
+  state="$(printf '%s\n' "$probe_output" | python3 -c 'import sys; lines=sys.stdin.read().splitlines(); print(lines[0] if lines else "unreachable")')"
 
-found = False
-for item in payload.get("data", []):
-    model_id = item.get("id")
-    if model_id:
-        found = True
-        print(model_id)
-if not found:
-    print("No models reported by oMLX.")
-PY
+  case "$state" in
+    models)
+      printf '%s\n' "$probe_output" | python3 -c 'import sys; lines=sys.stdin.read().splitlines(); print("\n".join(lines[1:]))'
+      ;;
+    empty)
+      printf 'No models are currently served.\n'
+      ;;
+    *)
+      printf 'oMLX is not running at %s. Start it with `ai start`.\n' "$(server_url)" >&2
+      return 1
+      ;;
+  esac
 }
 
 show_status() {
   local pid="-"
-  local api_status="unreachable"
+  local state="stopped"
+  local available="unreachable"
+  local probe_output
+  local probe_state
 
   if is_running; then
     pid="$(read_pid)"
+    state="running"
   fi
 
-  if curl -fsS "$(server_url)/v1/models" >/dev/null 2>&1; then
-    api_status="ready"
+  probe_output="$(fetch_server_models)"
+  probe_state="$(printf '%s\n' "$probe_output" | python3 -c 'import sys; lines=sys.stdin.read().splitlines(); print(lines[0] if lines else "unreachable")')"
+  case "$probe_state" in
+    models)
+      available="$(printf '%s\n' "$probe_output" | python3 -c 'import sys; lines=sys.stdin.read().splitlines(); print(", ".join(lines[1:]))')"
+      ;;
+    empty)
+      available="none"
+      ;;
+    *)
+      available="unreachable"
+      ;;
+  esac
+
+  if [ "$state" = "stopped" ] && [ "$available" = "unreachable" ]; then
+    available="none"
   fi
 
-  printf 'Server: %s\n' "$(server_url)"
-  printf 'Models: %s\n' "$AI_MODEL_DIR"
-  printf 'PID: %s\n' "$pid"
-  printf 'API: %s\n' "$api_status"
-  printf 'Log: %s\n' "$LOG_FILE"
+  printf 'State: %s\n' "$state"
+  printf 'Endpoint: %s\n' "$(server_url)"
+  printf 'Models dir: %s\n' "$AI_MODEL_DIR"
+  if [ "$pid" != "-" ]; then
+    printf 'PID: %s\n' "$pid"
+  fi
+  printf 'Served models: %s\n' "$available"
 
-  if [ "$api_status" = "ready" ]; then
-    printf 'Available models:\n'
-    show_models
+  if [ "$state" = "stopped" ]; then
+    printf 'Next: ai start\n'
   fi
 }
 
 command="${1:-}"
 case "$command" in
+  "")
+    show_status
+    ;;
   start)
     start_server
     ;;
