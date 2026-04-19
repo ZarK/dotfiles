@@ -58,7 +58,7 @@ fi
 if [ -s "$HOME/.bun/_bun" ]; then
   # bun completions
   source "$HOME/.bun/_bun"
-  
+
   # bun
   export BUN_INSTALL="$HOME/.bun"
   export PATH="$BUN_INSTALL/bin:$PATH"

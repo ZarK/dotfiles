@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Fix friday shebang to use asdf-managed Python instead of hardcoded Homebrew path
+# Run this after: brew upgrade friday
+
+HOMEBREW_PREFIX="${HOME}/.homebrew"
+FRIDAY_CELLAR="${HOMEBREW_PREFIX}/Cellar/friday"
+
+if [ ! -d "$FRIDAY_CELLAR" ]; then
+  echo "Error: Friday not found at $FRIDAY_CELLAR"
+  exit 1
+fi
+
+fixed_count=0
+for friday_bin in "$FRIDAY_CELLAR"/*/bin/friday-bin; do
+  if [ ! -f "$friday_bin" ]; then
+    continue
+  fi
+  
+  # Check current shebang
+  current_shebang=$(head -1 "$friday_bin")
+  
+  if [[ "$current_shebang" == "#!/usr/bin/env python3.12" ]]; then
+    echo "✓ Already fixed: $friday_bin"
+    continue
+  fi
+  
+  # Backup before modifying
+  backup="${friday_bin}.bak-$(date +%Y%m%d%H%M%S)"
+  cp "$friday_bin" "$backup"
+  echo "  Created backup: $backup"
+  
+  # Fix shebang
+  sed -i '' '1s|^#!.*/python3\.12.*$|#!/usr/bin/env python3.12|' "$friday_bin"
+  chmod +x "$friday_bin"
+  
+  echo "✓ Fixed shebang in: $friday_bin"
+  ((fixed_count++))
+done
+
+if [ $fixed_count -eq 0 ]; then
+  echo "No friday binaries needed fixing."
+else
+  echo ""
+  echo "Successfully fixed $fixed_count friday binary(ies)."
+  echo "Run 'friday --version' to verify."
+fi

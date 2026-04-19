@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Wrapper for Friday that automatically switches profile based on current user
+
+CONFIGS_DIR="/usr/local/etc/friday-configs"
+SYMLINK="/opt/homebrew/etc/friday"
+FRIDAY_BIN="/Users/tjalve.work/.homebrew/bin/friday"
+
+# Determine which profile to use based on username
+current_user=$(whoami)
+if [ "$current_user" = "tjalve.work" ]; then
+  desired_profile="tjalve.work"
+elif [ "$current_user" = "tjalve" ]; then
+  desired_profile="tjalve"
+else
+  # Default to current user if profile exists
+  if [ -d "$CONFIGS_DIR/$current_user" ]; then
+    desired_profile="$current_user"
+  else
+    echo "Warning: No Friday profile found for user '$current_user', using current profile"
+    exec "$FRIDAY_BIN" "$@"
+  fi
+fi
+
+# Check current profile
+if [ -L "$SYMLINK" ]; then
+  current_profile=$(basename "$(readlink "$SYMLINK")")
+else
+  current_profile="none"
+fi
+
+# Switch if needed
+if [ "$current_profile" != "$desired_profile" ]; then
+  target="$CONFIGS_DIR/$desired_profile"
+  
+  if [ ! -d "$target" ]; then
+    echo "Error: Profile directory not found: $target"
+    exit 1
+  fi
+  
+  # Switch symlink (requires sudo)
+  sudo rm -f "$SYMLINK" 2>/dev/null || true
+  sudo ln -sf "$target" "$SYMLINK"
+  sudo chown -R "$current_user" "$target" 2>/dev/null || true
+fi
+
+# Run Friday
+exec "$FRIDAY_BIN" "$@"

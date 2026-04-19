@@ -18,13 +18,14 @@ brew "node"                     # Node.js runtime for OpenClaw CLI
 brew "chezmoi"                  # dot-file manager (self-host)
 brew "uv"                       # package manager for Python
 brew "omlx"                     # local MLX inference server
-brew "fontconfig"              # font configuration library for better font management
-brew "mas"                     # Mac App Store CLI
-brew "powershell"              # PowerShell shell and scripting language
-brew "tmux"                    # terminal multiplexer
-brew "coreutils"               # GNU core utilities
-brew "czkawka"                 # duplicate file utility
-brew "ffmpeg"                  # media conversion and processing tools
+brew "fontconfig"               # font configuration library for better font management
+brew "mas"                      # Mac App Store CLI
+brew "micro"                    # Editor that replaces nano
+brew "powershell"               # PowerShell shell and scripting language
+brew "tmux"                     # terminal multiplexer
+brew "coreutils"                # GNU core utilities
+brew "czkawka"                  # duplicate file utility
+brew "ffmpeg"                   # media conversion and processing tools
 # brew "bun"  # Cannot be installed via Homebrew, intalled by run_once_install_other.sh
 
 ###############################################################################
