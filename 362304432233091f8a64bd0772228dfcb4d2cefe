@@ -1,0 +1,47 @@
+Brewfile
+  e62c3b3bbc5964bd 21-28
+run_once_20_install_brew.sh.tmpl
+  e62c3b3bbc5964bd 11-19
+run_once_30_install_other.sh.tmpl
+  e62c3b3bbc5964bd 1-32
+dot_local/bin/executable_friday-switch-profile
+  e62c3b3bbc5964bd 1-65
+run_once_10_setup_git_config.sh.tmpl
+  e62c3b3bbc5964bd 1-39
+run_once_60_setup_mas.sh
+  e62c3b3bbc5964bd 1-24
+run_once_80_refresh_font_cache.sh.tmpl
+  e62c3b3bbc5964bd 1-7
+dot_local/bin/executable_fix-friday-shebang
+  e62c3b3bbc5964bd 1-48
+run_once_40_install_setup_asdf.sh.tmpl
+  e62c3b3bbc5964bd 1-72
+run_once_70_install_fontconfig.sh.tmpl
+  e62c3b3bbc5964bd 1-9
+dot_local/bin/executable_friday-auto
+  e62c3b3bbc5964bd 1-49
+run_once_50_setup_asdf_permissions.sh
+  e62c3b3bbc5964bd 1-9
+README.md
+  e62c3b3bbc5964bd 3,19-35,47,49-51,59,64,67,69,85,91,98,101-104,106,113,115,125,129,139,143,145,157,159,162,164
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "362304432233091f8a64bd0772228dfcb4d2cefe",
+  "prompts": {
+    "e62c3b3bbc5964bd": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_25a9fb51bffe9PN0nqjnpyy1nD",
+        "model": "openai/gpt-5.4"
+      },
+      "human_author": "Tjalve Aarflot",
+      "messages": [],
+      "total_additions": 710,
+      "total_deletions": 39,
+      "accepted_lines": 670,
+      "overriden_lines": 7
+    }
+  }
+}
