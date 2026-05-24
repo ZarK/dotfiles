@@ -1,0 +1,23 @@
+dot_ai/executable_install.sh
+  s_c8cbc9f4b7c8b4::t_71754abe2fdf4f 5,43,46
+run_once_30_install_other.sh.tmpl
+  s_c8cbc9f4b7c8b4::t_71754abe2fdf4f 4,9-10,14,21
+.github/CODEOWNERS
+  s_c8cbc9f4b7c8b4::t_d434c28e2f0a9f 1-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "e86e931b3a3eb0452071bc4f6bdaacffd252227c",
+  "prompts": {},
+  "sessions": {
+    "s_c8cbc9f4b7c8b4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e589e-26b4-7da0-aae8-3ce976ea7109",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Tjalve Aarflot <tjalve.github@proton.me>"
+    }
+  }
+}
