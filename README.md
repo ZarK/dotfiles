@@ -19,6 +19,12 @@ Get an AI helper before anything else is set up. The native installer needs noth
 curl -fsSL https://claude.ai/install.sh | bash
 ```
 
+The installer puts the binary in `~/.local/bin`, which a fresh Mac doesn't have on PATH yet — add it for this session (your dotfiles make it permanent later):
+
+```sh
+export PATH="$HOME/.local/bin:$PATH"
+```
+
 Then start it and sign in with your Claude account (opens a browser; credentials from 1Password):
 
 ```sh
@@ -130,6 +136,14 @@ This step installs **Ghostty**, your terminal — switch to it for the rest of y
 Two one-time restores bring back everything that doesn't belong in a public repo:
 
 **Shell secrets** (API keys in `~/.zshrc.local`) come from 1Password. This is the only time 1Password is involved — after this, your shell just sources the plain file:
+
+The restore script uses the `op` CLI (installed by the Brewfile), which must first be connected to the 1Password app: open **1Password → Settings → Developer** and enable **"Integrate with 1Password CLI"**, then verify it answers:
+
+```shell
+op whoami
+```
+
+Then restore:
 
 ```shell
 restore-shell-secrets
