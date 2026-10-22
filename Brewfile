@@ -33,6 +33,7 @@ brew "ffmpeg"                   # media conversion and processing tools
 ###############################################################################
 cask_args appdir: "~/Applications"  # keep GUI apps in your user folder
 cask "warp"                         # Warp terminal
+cask "1password-cli"
 cask "font-hack-nerd-font"
 cask "font-fira-code-nerd-font"
 cask "warp"

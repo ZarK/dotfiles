@@ -27,10 +27,11 @@ alias edit='RETURN_DIR=$(pwd) && nano ~/.zshrc && cd "$RETURN_DIR" && source ~/.
 alias czkawka_cli='~/Applications/czkawka_cli'
 
 # Developer Tools
-alias code="open ~/Applications/Visual\ Studio\ Code.app"
+alias code="$HOME/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code"
 alias ollama="~/Applications/Ollama.app/Contents/MacOS/Ollama"
 alias orb="~/Applications/OrbStack.app/Contents/MacOS/orb"
-alias windsurf="$HOME/.codeium/windsurf/bin/windsurf"
+alias windsurf="$HOME/Applications/Devin.app/Contents/Resources/app/bin/devin-desktop"
+alias devin="$HOME/Applications/Devin.app/Contents/Resources/app/bin/devin-desktop"
 
 # Browsers
 alias vivaldi="open ~/Applications/Vivaldi.app"
@@ -72,7 +73,7 @@ fi
 # Exports
 export EDITOR=nano
 
-# Local, untracked overrides (API keys, machine-specific stuff)
+# Local secrets and machine-specific overrides
 if [ -f "$HOME/.zshrc.local" ]; then
   source "$HOME/.zshrc.local"
 fi
@@ -97,3 +98,33 @@ export PATH="/Users/tjalve/.git-ai/bin:$PATH"
 
 # opencode
 export PATH=/Users/tjalve/.opencode/bin:$PATH
+
+# OpenCode profile launcher: enables `opencode zen` and `opencode copilot`.
+if [ -f "$HOME/.config/opencode/opencode-profile.zsh" ]; then
+  source "$HOME/.config/opencode/opencode-profile.zsh"
+fi
+
+# OpenClaw Completion
+source "/Users/tjalve/.openclaw/completions/openclaw.zsh"
+
+# >>> grok installer >>>
+export PATH="$HOME/.grok/bin:$PATH"
+# <<< grok installer <<<
+
+# pnpm
+export PNPM_HOME="/Users/tjalve/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME/bin:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
+esac
+# pnpm end
+
+alias beekeeper="open -a 'Beekeeper Studio'"
+alias tfgui="python3 $HOME/Github/fold-studio/server.py"
+codex() { open -a Codex "${1:-.}"; }
+# oMLX: CLI shim path begin
+case ":$PATH:" in
+  *":$HOME/.omlx/bin:"*) ;;
+  *) export PATH="$HOME/.omlx/bin:$PATH" ;;
+esac
+# oMLX: CLI shim path end
