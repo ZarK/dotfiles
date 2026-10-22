@@ -1,0 +1,31 @@
+.chezmoiignore
+  s_9ab2dc8a95e6ca::t_58ba4619bd904c 3
+.claude/commands/make-it-so.md
+  s_9ab2dc8a95e6ca::t_e20030290a60c9 1-35
+.gitignore
+  s_9ab2dc8a95e6ca::t_1dceb6b48600f3 1-7
+.grok/commands/make-it-so.md
+  s_9ab2dc8a95e6ca::t_5cdb56e56e457a 1-35
+.qube/aie/config.json
+  s_9ab2dc8a95e6ca::t_79eb5732fbec2a 3-29,31-287
+AGENTS.md
+  s_9ab2dc8a95e6ca::t_263ecab2be0b5f 8-89
+CLAUDE.md
+  s_9ab2dc8a95e6ca::t_6244596509b764 1-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e670b0337a8786de77c029708924eb6f9743bab9",
+  "prompts": {},
+  "sessions": {
+    "s_9ab2dc8a95e6ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb9cc6b0-8b11-4a95-b24a-ab6f85343e71",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Tjalve Aarflot <tjalve.github@proton.me>"
+    }
+  }
+}
