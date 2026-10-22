@@ -2,17 +2,24 @@
 
 This guide helps you set up a new Mac from scratch using Homebrew and Chezmoi-managed dotfiles. Follow the steps in order.
 
-*(Everything runs in the default Terminal until the Brewfile installs Ghostty in step 10 — switch to Ghostty after that.)*
+*(Everything runs in the default Terminal until the Brewfile installs Ghostty in step 9 — switch to Ghostty after that.)*
 
-## 1. Install Claude Code (your AI setup assistant)
+## 1. Install 1Password (Credentials First)
 
-Get an AI helper before anything else. The native installer needs nothing but curl — no Homebrew, no Node:
+Every later sign-in (Claude, GitHub, App Store extras) pulls credentials from 1Password, so it comes first. You sign in to it with the two things you carry in your head / Emergency Kit: account password and Secret Key.
+
+1. **Install 1Password** from the Mac App Store (you signed in to your Apple ID during Setup Assistant)
+2. **Launch 1Password** and sign in to your account
+
+## 2. Install Claude Code (your AI setup assistant)
+
+Get an AI helper before anything else is set up. The native installer needs nothing but curl — no Homebrew, no Node:
 
 ```sh
 curl -fsSL https://claude.ai/install.sh | bash
 ```
 
-Then start it and sign in with your Claude account (opens a browser):
+Then start it and sign in with your Claude account (opens a browser; credentials from 1Password):
 
 ```sh
 claude
@@ -20,54 +27,31 @@ claude
 
 From here on you can paste this README at Claude Code and let it drive the rest of the setup, or ask it for help whenever a step misbehaves.
 
-## 2. Install 1Password (Early Setup)
+## 3. Install Homebrew (standard location)
 
-Before continuing, set up 1Password for credential management:
+Use the official installer — it puts Homebrew in `/opt/homebrew`, installs the Xcode Command Line Tools if they're missing, and asks for your password once:
 
-```shell
-# Create the ~/Applications folder for user-installed apps
-mkdir -p ~/Applications
+```sh
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-1. **Install 1Password** from the Mac App Store (search for "1Password")
-2. **Move 1Password** from `/Applications` to `~/Applications` (drag and drop in Finder)
-3. **Launch 1Password** from `~/Applications` and sign in to your account
+Then put it on PATH for this session (your `.zprofile` handles this permanently once chezmoi applies):
 
-This early setup ensures you have secure credential management available throughout the bootstrap process. You'll need it in step 11 to restore your shell secrets.
-
-## 3. Install Homebrew in `~/.homebrew` (Local User Install)
-
-Install Homebrew locally (to avoid any system-wide changes):
-
-```shell
-cd ~
-# Download Homebrew into .homebrew (no sudo needed)
-mkdir -p .homebrew && curl -L https://github.com/Homebrew/brew/tarball/master | tar -xz --strip-components 1 -C .homebrew
+```sh
+eval "$(/opt/homebrew/bin/brew shellenv)"
 ```
 
-**Note:** The PATH setup, updates, and permissions will be properly configured when you run chezmoi later. For now, just having Homebrew downloaded is sufficient.
+> The standard location means bottled (pre-built) packages for everything — no building from source, and no apps confused by living outside `/Applications`.
 
-> **Note:** The above uses Homebrew's "untar anywhere" approach to install it in your home directory. We avoid the default `/usr/local` or `/opt/homebrew` to keep everything local to your user.
-
-## 4. Install XCode Command Line Tools
-
-These are required to install further developer tools like GitHub CLI
+## 4. Install GitHub CLI (`gh`)
 
 ```shell
-xcode-select --install
-```
-
-## 5. Install GitHub CLI (`gh`)
-
-Now use Homebrew to install the GitHub CLI tool:
-
-```shell
-~/.homebrew/bin/brew install gh
+brew install gh
 ```
 
 This installs the `gh` command, which you'll use to authenticate with GitHub and manage your SSH keys.
 
-## 6. Authenticate with GitHub (HTTPS)
+## 5. Authenticate with GitHub (HTTPS)
 
 Log in to your GitHub account via the CLI:
 
@@ -83,7 +67,7 @@ When prompted:
 
 After a successful login, `gh` is authorized to act on your behalf on GitHub (via HTTPS). You can verify by running `gh auth status` if curious.
 
-## 7. Generate and Add an SSH Key
+## 6. Generate and Add an SSH Key
 
 Next, set up SSH access for Git operations.
 
@@ -111,7 +95,7 @@ This command uses your logged-in GitHub CLI session to add the key to your GitHu
 
 **Note:** If you set a passphrase on the key, macOS may ask for it when using the key. Consider adding the key to the ssh-agent (and macOS Keychain) for convenience, so you won't have to enter the passphrase every time.
 
-## 8. Install Chezmoi
+## 7. Install Chezmoi
 
 With Homebrew ready, install [Chezmoi](https://www.chezmoi.io/) (the dotfiles manager):
 
@@ -121,11 +105,11 @@ brew install chezmoi
 
 This provides the `chezmoi` command, which you will use to pull down your dotfiles and apply them.
 
-## 9. Sign in to Mac App Store
+## 8. Sign in to Mac App Store
 
-Open the **Mac App Store** app and sign in with your Apple ID before running `chezmoi init --apply`. This lets Homebrew Bundle attempt the Mac App Store installs in your Brewfile. If they are skipped or fail, rerun `brew bundle --file ~/.local/share/chezmoi/Brewfile` after signing in.
+Open the **Mac App Store** app and confirm you're signed in with your Apple ID before running `chezmoi init --apply`. This lets Homebrew Bundle attempt the Mac App Store installs in your Brewfile. If they are skipped or fail, rerun `brew bundle --file ~/.local/share/chezmoi/Brewfile` after signing in.
 
-## 10. Pull and Apply Dotfiles with Chezmoi (via SSH)
+## 9. Pull and Apply Dotfiles with Chezmoi (via SSH)
 
 ```shell
 chezmoi init --apply git@github.com:ZarK/dotfiles.git
@@ -139,9 +123,9 @@ This command tells chezmoi to **clone your dotfiles repo over SSH** (using the `
 
   *You don't need to manually run `brew bundle` - the Chezmoi init/apply process did it via that script.* If you ever update your Brewfile, rerunning chezmoi apply or the script will install any new items.
 
-This step installs **Ghostty**, your terminal — switch to it for the rest of your session.
+This step installs **Ghostty**, your terminal — switch to it for the rest of your session. GUI apps land in the standard `/Applications`.
 
-## 11. Restore Secrets and Agent Memory
+## 10. Restore Secrets and Agent Memory
 
 Two one-time restores bring back everything that doesn't belong in a public repo:
 
@@ -160,7 +144,7 @@ gh repo clone ZarK/agent-memory ~/Github/agent-memory
 
 Skills and commands come with the `agent-skills` repo — clone that too if it isn't already in place.
 
-## 12. Refresh Font Cache (for Nerd Fonts)
+## 11. Refresh Font Cache (for Nerd Fonts)
 
 If your Brewfile included any Nerd Fonts (commonly used for development setups), macOS might not show the new fonts immediately. To ensure they appear in your apps, refresh the macOS font cache:
 
@@ -172,9 +156,9 @@ You can now select the Nerd Fonts in Ghostty's settings (and in Zed).
 
 ---
 
-## 13. Mac App Store Apps
+## 12. Mac App Store Apps
 
-The following Mac App Store apps are attempted during the `brew bundle` step (provided you completed step 9):
+The following Mac App Store apps are attempted during the `brew bundle` step (provided you completed step 8):
 
 - **Tailscale** (1475387142): VPN and network mesh tool
 - **Slack** (803453959): team chat
@@ -188,12 +172,12 @@ These apps are handled by the `mas` command line tool during the `brew bundle` s
 
 That's it! 🎉 When your Mac comes back up, you should have your full development environment ready to go:
 
-* Claude Code is installed and helped you get here.
+* 1Password holds the keys, and Claude Code helped you get here.
 * Ghostty is installed as your terminal.
-* Homebrew (in `~/.homebrew`) is managing all your packages locally.
+* Homebrew (in `/opt/homebrew`) is managing all your packages with bottled installs.
 * Your GitHub CLI is authenticated, and your SSH key is set up for Git operations.
 * All your dotfiles are in place (shell config, settings, etc., courtesy of Chezmoi).
-* All apps and tools from your Brewfile are installed.
+* All apps and tools from your Brewfile are installed into `/Applications`.
 * Your shell secrets and agent memory are restored.
 * Your Nerd Fonts are registered and ready to use (select them in Ghostty or your IDE, if needed).
 

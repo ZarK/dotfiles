@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Use the Homebrew that’s already in ~/.homebrew (setup in README)
-BREW_BIN="$HOME/.homebrew/bin/brew"
+# Use the standard Homebrew install (setup in README)
+BREW_BIN="/opt/homebrew/bin/brew"
 
 # 1. Install everything declared in the Brewfile
 "$BREW_BIN" bundle --file="{{ .chezmoi.sourceDir }}/Brewfile"
