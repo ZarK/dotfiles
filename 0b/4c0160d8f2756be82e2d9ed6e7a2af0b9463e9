@@ -1,0 +1,14 @@
+Brewfile
+  h_13eab01d19dfa9 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0b4c0160d8f2756be82e2d9ed6e7a2af0b9463e9",
+  "prompts": {},
+  "humans": {
+    "h_13eab01d19dfa9": {
+      "author": "Tjalve Aarflot <tjalve.github@proton.me>"
+    }
+  }
+}
