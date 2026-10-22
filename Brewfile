@@ -14,49 +14,57 @@ brew "bat"                      # cat with syntax
 brew "gh"                       # GitHub CLI
 brew "python@3.12"              # Python 3.12
 brew "git"                      # git CLI tools
-brew "node"                     # Node.js runtime for OpenClaw CLI
 brew "chezmoi"                  # dot-file manager (self-host)
 brew "uv"                       # package manager for Python
 brew "omlx"                     # local MLX inference server
 brew "fontconfig"               # font configuration library for better font management
 brew "mas"                      # Mac App Store CLI
-brew "micro"                    # Editor that replaces nano
-brew "powershell"               # PowerShell shell and scripting language
 brew "tmux"                     # terminal multiplexer
 brew "coreutils"                # GNU core utilities
 brew "czkawka"                  # duplicate file utility
 brew "ffmpeg"                   # media conversion and processing tools
-# brew "bun"  # Cannot be installed via Homebrew, intalled by run_once_install_other.sh
+brew "imagemagick"              # image conversion and processing
+brew "exiftool"                 # read/write media metadata
+brew "rsync"                    # file sync, newer than the macOS built-in
+brew "shellcheck"               # shell script linter
+brew "shfmt"                    # shell script formatter
+brew "marksman"                 # Markdown LSP (used by Zed)
+brew "bats-core"                # Bash test framework
+# brew "bun"  # Cannot be installed via Homebrew, installed by run_once_install_other.sh
+# claude / opencode / codex CLIs install via their own installers, not brew
 
 ###############################################################################
 # Casks (GUI apps / fonts)
 ###############################################################################
 cask_args appdir: "~/Applications"  # keep GUI apps in your user folder
-cask "warp"                         # Warp terminal
+cask "ghostty"                      # terminal
+cask "1password"
+cask "1password-cli"
 cask "font-hack-nerd-font"
 cask "font-fira-code-nerd-font"
-cask "warp"
 cask "raycast"
-cask "1password"
-# cask "tailscale"  # Requires system components; see README for manual install
 cask "vivaldi"
+cask "zed"
+cask "cursor"
 cask "visual-studio-code"
-cask "windsurf"
+cask "claude"
+cask "chatgpt"
 cask "obsidian"
 cask "orbstack"
-cask "ollama"
+cask "google-drive"
+cask "displaylink"              # DisplayLink Manager for docked monitors
 cask "vlc"
 cask "keka"
-cask "ghostty"
-cask "claude"
-cask "ditto"
-cask "slack"
-cask "forklift"
-# cask "gifski"  # Could not be installed via Homebrew, install manually
-# cask "screens"  # Homebrew only provides Screens 4; install Screens 5 manually (see README)
+cask "beekeeper-studio"          # SQL editor (beekeeperstudio.io)
+cask "licecap"                   # animated screen capture (cockos.com)
+# Not in Homebrew — install manually from official sources:
+#   Task Manager TMOG (com.tmog.taskmanager)
+#   Grok Bot (com.anysphere.sand — legit: developed inside Cursor/Anysphere,
+#   branded as a Grok product after the xAI acquisition)
 cask "proton-drive"
 cask "proton-mail"
 cask "protonvpn"
+# cask "tailscale"  # Requires system components; installed via mas below
 
 ###############################################################################
 # Mac App Store apps (installed via mas)
@@ -66,6 +74,11 @@ cask "protonvpn"
 # If they are skipped or fail, sign in to App Store.app and rerun:
 #   brew bundle --file="$HOME/.local/share/chezmoi/Brewfile"
 mas "Tailscale", id: 1475387142
-mas "Gifski", id: 1351639930
-mas "Screens 5: VNC Remote Desktop", id: 1663047912
-mas "CoffeeTime -Anti Sleep App", id: 6743958600
+mas "Slack", id: 803453959
+mas "Keynote", id: 409183694
+mas "Numbers", id: 409203825
+mas "Pages", id: 409201541
+mas "Infuse", id: 1136220934
+mas "CleanMyMac", id: 1339170533
+mas "Commander One", id: 1035236694
+mas "Coffee Time", id: 6743958600

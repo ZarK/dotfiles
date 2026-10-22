@@ -1,0 +1,324 @@
+{
+  "version": 1,
+  "providers": {
+    "work": {
+      "kind": "github"
+    },
+    "review": {
+      "kind": "github",
+      "publisher": {
+        "mode": "user"
+      }
+    },
+    "repository": {
+      "kind": "local-git"
+    },
+    "ci": {
+      "kind": "github"
+    },
+    "layout": {
+      "kind": "local"
+    },
+    "capabilities": {
+      "work": true,
+      "review": true,
+      "repository": true,
+      "ci": true,
+      "layout": true
+    }
+  },
+  "policy": {
+    "labels": {
+      "priorities": [
+        "P1-Critical",
+        "P2-High",
+        "P3-Medium",
+        "P4-Low"
+      ],
+      "statuses": [
+        "S-Ready",
+        "S-InProgress",
+        "S-Blocked",
+        "S-Blocking"
+      ],
+      "components": []
+    },
+    "milestoneOrdering": {
+      "enabled": false,
+      "order": [],
+      "missingAssignment": "warn"
+    },
+    "branch": {
+      "naming": "issue/<number>-<slug>",
+      "baseBranch": "main",
+      "baseRemote": "origin",
+      "noWorktree": true,
+      "blockOnOpenPRs": true,
+      "requireBaseBranchFreshness": true,
+      "ignoredAutomationAuthors": [
+        "dependabot[bot]",
+        "renovate[bot]",
+        "github-actions[bot]"
+      ]
+    },
+    "lifecycle": {
+      "assignOnStart": true,
+      "commentOnStart": true
+    },
+    "shipping": {
+      "autonomousMode": true,
+      "mergeStrategy": "squash"
+    },
+    "reviews": {
+      "adapter": "local",
+      "mode": "isolated",
+      "profile": "local-focused",
+      "severityThreshold": "high",
+      "promptFragments": {
+        "repository": [],
+        "safety": [],
+        "style": [],
+        "adapter": [],
+        "reviewer": [],
+        "commandAddendum": []
+      },
+      "contextSources": {
+        "instructions": [
+          "AGENTS.md",
+          "**/AGENTS.md",
+          "CLAUDE.md",
+          "**/CLAUDE.md"
+        ],
+        "requirements": [
+          "docs/spec.md",
+          "products/aie/docs/*.md"
+        ],
+        "issues": "github",
+        "issueComments": "github",
+        "linkedIssues": "github",
+        "milestones": "github",
+        "pullRequests": "github",
+        "prComments": "github",
+        "reviewThreads": "github"
+      },
+      "lanes": [
+        {
+          "id": "issue-compliance",
+          "required": "always",
+          "match": [],
+          "severityThreshold": "high",
+          "prompt": [],
+          "tools": [],
+          "runner": "local-host",
+          "rereview": "always-rerun",
+          "route": null,
+          "carryForwardContext": "all",
+          "tier": "review",
+          "suppress": [],
+          "maxAdvisoryFindings": null,
+          "optOut": false
+        },
+        {
+          "id": "code-quality",
+          "required": "always",
+          "match": [],
+          "severityThreshold": "high",
+          "prompt": [],
+          "tools": [],
+          "runner": "local-host",
+          "rereview": "delta",
+          "route": null,
+          "carryForwardContext": "scope",
+          "tier": "review",
+          "suppress": [],
+          "maxAdvisoryFindings": null,
+          "optOut": false
+        },
+        {
+          "id": "performance",
+          "required": "when-matched",
+          "match": [
+            "**/*indexer*",
+            "**/*embed*",
+            "**/*retrieval*",
+            "**/*queue*",
+            "**/*cache*",
+            "**/*worker*",
+            "**/*stream*",
+            "**/*scheduler*",
+            "**/*virtual*"
+          ],
+          "severityThreshold": "high",
+          "prompt": [],
+          "tools": [],
+          "runner": "local-host",
+          "rereview": "delta",
+          "route": null,
+          "carryForwardContext": "scope",
+          "tier": "review",
+          "suppress": [],
+          "maxAdvisoryFindings": null,
+          "optOut": false
+        },
+        {
+          "id": "ui-ux-accessibility",
+          "required": "when-matched",
+          "match": [
+            "**/*.css",
+            "**/*.tsx",
+            "apps/**",
+            "design/**"
+          ],
+          "severityThreshold": "high",
+          "prompt": [],
+          "tools": [],
+          "runner": "local-host",
+          "rereview": "delta",
+          "route": null,
+          "carryForwardContext": "scope",
+          "tier": "review",
+          "suppress": [],
+          "maxAdvisoryFindings": null,
+          "optOut": false
+        },
+        {
+          "id": "security",
+          "required": "when-matched",
+          "match": [
+            "**/auth/**",
+            "**/security/**",
+            "**/crypto/**",
+            "**/gateway/**",
+            ".github/**",
+            ".qube/**",
+            "package.json",
+            "**/package.json",
+            "package-lock.json",
+            "pnpm-lock.yaml",
+            "yarn.lock",
+            "bun.lockb",
+            "bun.lock",
+            "**/*trust*",
+            "**/*token*",
+            "**/*auth*"
+          ],
+          "severityThreshold": "high",
+          "prompt": [],
+          "tools": [],
+          "runner": "local-host",
+          "rereview": "delta",
+          "route": {
+            "host": "grok-build",
+            "tier": "review",
+            "timeoutSeconds": 900,
+            "maxTurns": 16
+          },
+          "carryForwardContext": "config",
+          "tier": "review",
+          "suppress": [],
+          "maxAdvisoryFindings": null,
+          "optOut": false
+        }
+      ],
+      "sources": [
+        {
+          "id": "local-lanes",
+          "identity": "lane",
+          "expected": [
+            "issue-compliance",
+            "code-quality"
+          ],
+          "blocking": true,
+          "markers": "trusted",
+          "enabled": true
+        }
+      ],
+      "agents": [],
+      "localAgents": [],
+      "waitMinutes": 0,
+      "concurrency": 3,
+      "requestText": "",
+      "carryForwardPublish": "note",
+      "nitCap": 10,
+      "deltaFullEvery": 3,
+      "models": {
+        "review": {
+          "grok-build": {
+            "model": "grok-4.7",
+            "effort": null
+          }
+        }
+      },
+      "route": {
+        "host": "grok-build",
+        "tier": "review",
+        "timeoutSeconds": 900,
+        "maxTurns": 16
+      },
+      "failover": null
+    },
+    "gates": {
+      "definitions": [],
+      "qualityControl": false,
+      "focusedSelectors": []
+    },
+    "audit": {
+      "manualUiAudit": false,
+      "appLaunch": "",
+      "target": "",
+      "evidenceRoot": ""
+    },
+    "instructions": {
+      "namingRules": false,
+      "promptInjectionWarning": true,
+      "noCreditWarning": true,
+      "implementationGuardrails": true,
+      "supplyChainSafety": true
+    },
+    "supplyChain": {
+      "exactVersions": true,
+      "intentionalLockfileChanges": true,
+      "disableLifecycleScripts": true,
+      "pinCiActions": true,
+      "packageAgeDays": 7,
+      "highRiskPackageAgeDays": 14,
+      "requireApprovalForUnverifiedRisk": true,
+      "writePackageManagerDefaults": false
+    },
+    "modelRouting": {
+      "primary": "primary",
+      "catalog": [
+        {
+          "id": "primary",
+          "host": "claude-code",
+          "transport": "host",
+          "costRank": 3,
+          "notes": "Primary host model. Fallback target for every delegated route class."
+        }
+      ],
+      "routes": {
+        "mechanical-implementation": {
+          "preferred": "primary",
+          "fallback": [
+            "primary"
+          ]
+        },
+        "exploration-investigation": {
+          "preferred": "primary",
+          "fallback": [
+            "primary"
+          ]
+        },
+        "independent-review": {
+          "reviewTier": "review"
+        },
+        "synthesis-judgment": {
+          "preferred": "primary",
+          "fallback": [
+            "primary"
+          ]
+        }
+      }
+    }
+  }
+}

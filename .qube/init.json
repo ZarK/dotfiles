@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "hosts": [
+    "claude-code",
+    "grok-build"
+  ],
+  "review": {
+    "mode": "isolated",
+    "harness": "grok-build",
+    "models": [
+      "grok-build:grok-4.7"
+    ]
+  }
+}
