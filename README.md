@@ -166,6 +166,12 @@ The restore script uses the `op` CLI (installed by the Brewfile), which must fir
 op whoami
 ```
 
+If it says the account is not signed in: unlock the 1Password app, confirm the Developer toggle is on, then connect the CLI once and pick your account when prompted:
+
+```shell
+op signin
+```
+
 Then restore:
 
 ```shell

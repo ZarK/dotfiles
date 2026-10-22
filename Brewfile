@@ -28,7 +28,7 @@ brew "shellcheck"               # shell script linter
 brew "shfmt"                    # shell script formatter
 brew "marksman"                 # Markdown LSP (used by Zed)
 brew "bats-core"                # Bash test framework
-# brew "bun"  # Cannot be installed via Homebrew, installed by run_once_install_other.sh
+# pnpm installs standalone via run_once_30 (needs no node; node comes from asdf)
 # claude / opencode / codex CLIs install via their own installers, not brew
 
 ###############################################################################

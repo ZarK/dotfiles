@@ -1,32 +1,25 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -uo pipefail
 
-# 1. Install Bun (official method, not via Homebrew)
-if ! command -v bun &>/dev/null; then
-  echo "Installing Bun (JavaScript runtime) via official script..."
-  curl -fsSL https://bun.sh/install | bash
+# Installs pnpm (standalone — needs no Node; Node itself comes from asdf in
+# the next script). Never exits nonzero; failures are reported, not fatal.
+
+if command -v pnpm >/dev/null 2>&1; then
+  echo "pnpm is already installed."
 else
-  echo "Bun is already installed."
+  echo "Installing pnpm via the official standalone script..."
+  if ! curl -fsSL https://get.pnpm.io/install.sh | sh -; then
+    echo "WARNING: pnpm install failed. Retry later with:"
+    echo "  curl -fsSL https://get.pnpm.io/install.sh | sh -"
+    exit 0
+  fi
 fi
 
-export BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
-# 2. Install OpenClaw CLI (prefer Bun, fall back to npm)
-if command -v bun &>/dev/null; then
-  if ! command -v openclaw &>/dev/null; then
-    echo "Installing OpenClaw CLI via Bun..."
-    bun add --global openclaw@latest
-  else
-    echo "OpenClaw CLI is already installed."
-  fi
-elif command -v npm &>/dev/null; then
-  if ! command -v openclaw &>/dev/null; then
-    echo "Installing OpenClaw CLI via npm fallback..."
-    npm install -g openclaw@latest
-  else
-    echo "OpenClaw CLI is already installed."
-  fi
-else
-  echo "Skipping OpenClaw install because neither Bun nor npm is available yet."
+# Supply-chain cooldown: only install packages at least 7 days old.
+PNPM_BIN="$(command -v pnpm || echo "$HOME/Library/pnpm/pnpm")"
+if [ -x "$PNPM_BIN" ]; then
+  "$PNPM_BIN" config set --global minimumReleaseAge 10080 || \
+    echo "WARNING: could not set pnpm minimumReleaseAge; set it manually."
 fi
+
+exit 0
