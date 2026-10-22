@@ -120,6 +120,15 @@ The echo should print something like `you@macbook-pro-m5-max`.
   gh ssh-key list
   ```
 
+**g) Add the same key as a signing key** (protected branches require signed commits; GitHub keeps signing keys separate from login keys, and this needs its own scope):
+
+  ```shell
+  gh auth refresh -h github.com -s admin:ssh_signing_key
+  gh ssh-key add ~/.ssh/id_ed25519.pub --type signing --title "$KEY_LABEL"
+  ```
+
+`chezmoi apply` then configures git to sign every commit and tag with this key.
+
 This command uses your logged-in GitHub CLI session to add the key to your GitHub account. If prompted for additional scopes or confirmation, follow along. After this, GitHub will trust logins from your Mac via that SSH key.
 
 **Note:** If you set a passphrase on the key, macOS may ask for it when using the key. Consider adding the key to the ssh-agent (and macOS Keychain) for convenience, so you won't have to enter the passphrase every time.

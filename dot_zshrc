@@ -49,7 +49,7 @@ if [ -d "$HOME/.ai/bin" ]; then
 fi
 
 # asdf version manager
-[ -f /opt/homebrew/opt/asdf/libexec/asdf.sh ] && . /opt/homebrew/opt/asdf/libexec/asdf.sh
+export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 
 # Exports
 export EDITOR=nano
@@ -95,7 +95,7 @@ esac
 # pnpm end
 
 alias beekeeper="open -a 'Beekeeper Studio'"
-alias tfgui="python3 $HOME/Github/fold-studio/server.py"
+alias fold="python $HOME/Github/fold-studio/server.py"
 codex() { open -a Codex "${1:-.}"; }
 # oMLX: CLI shim path begin
 case ":$PATH:" in
