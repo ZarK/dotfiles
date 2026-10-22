@@ -1,0 +1,38 @@
+README.md
+  s_9ab2dc8a95e6ca::t_7890498ac26efe 5,7,9-16,22,30,32,34-35,38,40-41,44,46,49,54,70,98,108,110,112,126,128,147,159,161,175,177,180
+dot_zshrc
+  s_9ab2dc8a95e6ca::t_6030575217f091 20-21
+  s_9ab2dc8a95e6ca::t_3add539e91269d 76,78,82,84-85,88
+  s_9ab2dc8a95e6ca::t_4eab21b0c2f9b0 96
+  s_9ab2dc8a95e6ca::t_32760526f6b568 103
+  s_9ab2dc8a95e6ca::t_f6d435bbd65801 29-30,33,36,39-40,43,45
+  s_9ab2dc8a95e6ca::t_424dd2def87b5e 62
+run_once_50_setup_asdf_permissions.sh
+  s_9ab2dc8a95e6ca::t_559aa8b129a00c 5-6
+run_once_20_install_brew.sh.tmpl
+  s_9ab2dc8a95e6ca::t_7f5c65c8d89d81 4-5
+run_once_70_install_fontconfig.sh.tmpl
+  s_9ab2dc8a95e6ca::t_12155ce13a6774 4
+dot_zprofile.tmpl
+  s_9ab2dc8a95e6ca::t_1981f1eabb54da 3-4,7-8,11,14
+dot_ai/executable_install.sh
+  s_9ab2dc8a95e6ca::t_64db0288dca0c5 9
+Brewfile
+  s_9ab2dc8a95e6ca::t_d59eb4cf9b2d0e 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6ab85437c94d90f1f16e42731b699ce40aafd20b",
+  "prompts": {},
+  "sessions": {
+    "s_9ab2dc8a95e6ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb9cc6b0-8b11-4a95-b24a-ab6f85343e71",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Tjalve Aarflot <tjalve.github@proton.me>"
+    }
+  }
+}
