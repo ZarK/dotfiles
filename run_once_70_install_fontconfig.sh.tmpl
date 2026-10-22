@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BREW_BIN="$HOME/.homebrew/bin/brew"
+BREW_BIN="/opt/homebrew/bin/brew"
 
 if ! "$BREW_BIN" list fontconfig &>/dev/null; then
     "$BREW_BIN" install fontconfig

@@ -17,36 +17,32 @@ eval "$(starship init zsh)"
 eval "$(zoxide init zsh)"
 
 # fzf keys (load if it exists, else ignore)
-[[ -f "$HOME/.homebrew/opt/fzf/shell/key-bindings.zsh" ]] && \
-  source "$HOME/.homebrew/opt/fzf/shell/key-bindings.zsh"
+[[ -f "/opt/homebrew/opt/fzf/shell/key-bindings.zsh" ]] && \
+  source "/opt/homebrew/opt/fzf/shell/key-bindings.zsh"
 
 # Aliases
 alias ls='eza -lah --group-directories-first'
 alias tailscale='/Applications/Tailscale.app/Contents/MacOS/Tailscale'
 alias edit='RETURN_DIR=$(pwd) && nano ~/.zshrc && cd "$RETURN_DIR" && source ~/.zshrc'
-alias czkawka_cli='~/Applications/czkawka_cli'
 
 # Developer Tools
-alias code="$HOME/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code"
-alias ollama="~/Applications/Ollama.app/Contents/MacOS/Ollama"
-alias orb="~/Applications/OrbStack.app/Contents/MacOS/orb"
-alias windsurf="$HOME/Applications/Devin.app/Contents/Resources/app/bin/devin-desktop"
-alias devin="$HOME/Applications/Devin.app/Contents/Resources/app/bin/devin-desktop"
+alias code="/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code"
+alias orb="/Applications/OrbStack.app/Contents/MacOS/orb"
 
 # Browsers
-alias vivaldi="open ~/Applications/Vivaldi.app"
+alias vivaldi='open -a Vivaldi'
 
 # Media
-alias vlc="open ~/Applications/VLC.app"
+alias vlc='open -a VLC'
 
 # Productivity
-alias obsidian="open ~/Applications/Obsidian.app"
-alias raycast="open ~/Applications/Raycast.app"
+alias obsidian='open -a Obsidian'
+alias raycast='open -a Raycast'
 
 # Utilities
-alias keka="open ~/Applications/Keka.app"
+alias keka='open -a Keka'
 alias localai="$HOME/tools/opencode-local/start-opencode-local.sh"
-alias protonmail="open ~/Applications/Proton\ Mail.app"
+alias protonmail='open -a "Proton Mail"'
 
 if [ -d "$HOME/.ai/bin" ]; then
   export PATH="$HOME/.ai/bin:$PATH"
@@ -62,13 +58,8 @@ if [ -s "$HOME/.bun/_bun" ]; then
   export PATH="$BUN_INSTALL/bin:$PATH"
 fi
 
-if [ -d "$HOME/.codeium/windsurf/bin" ]; then
-  # Added by Windsurf
-  export PATH="$HOME/.codeium/windsurf/bin:$PATH"
-fi
-
 # asdf version manager
-. "$HOME/.homebrew/opt/asdf/libexec/asdf.sh"
+[ -f /opt/homebrew/opt/asdf/libexec/asdf.sh ] && . /opt/homebrew/opt/asdf/libexec/asdf.sh
 
 # Exports
 export EDITOR=nano
@@ -82,22 +73,19 @@ fi
 export DOTNET_ROOT=$HOME/.asdf/installs/dotnet/10.0.101
 
 # Added by Antigravity
-export PATH="/Users/tjalve/.antigravity/antigravity/bin:$PATH"
+export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
-export PATH="$PATH:/Users/tjalve/.dotnet/tools"
+export PATH="$PATH:$HOME/.dotnet/tools"
 export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
 
 # cubic
-export PATH=/Users/tjalve/.cubic/bin:$PATH
+export PATH="$HOME/.cubic/bin:$PATH"
 
-# Added by Windsurf - Next
-export PATH="/Users/tjalve/.codeium/windsurf/bin:$PATH"
-
-# Added by git-ai installer on Sun Mar  8 11:11:30 CET 2026
-export PATH="/Users/tjalve/.git-ai/bin:$PATH"
+# Added by git-ai installer
+export PATH="$HOME/.git-ai/bin:$PATH"
 
 # opencode
-export PATH=/Users/tjalve/.opencode/bin:$PATH
+export PATH="$HOME/.opencode/bin:$PATH"
 
 # OpenCode profile launcher: enables `opencode zen` and `opencode copilot`.
 if [ -f "$HOME/.config/opencode/opencode-profile.zsh" ]; then
@@ -105,14 +93,14 @@ if [ -f "$HOME/.config/opencode/opencode-profile.zsh" ]; then
 fi
 
 # OpenClaw Completion
-source "/Users/tjalve/.openclaw/completions/openclaw.zsh"
+[ -f "$HOME/.openclaw/completions/openclaw.zsh" ] && source "$HOME/.openclaw/completions/openclaw.zsh"
 
 # >>> grok installer >>>
 export PATH="$HOME/.grok/bin:$PATH"
 # <<< grok installer <<<
 
 # pnpm
-export PNPM_HOME="/Users/tjalve/Library/pnpm"
+export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME/bin:"*) ;;
   *) export PATH="$PNPM_HOME/bin:$PATH" ;;

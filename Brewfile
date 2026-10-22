@@ -1,5 +1,5 @@
 ###############################################################################
-# Formulae (CLI tools installed into ~/.homebrew/bin)
+# Formulae (CLI tools installed into /opt/homebrew/bin)
 ###############################################################################
 tap "jundot/omlx", "https://github.com/jundot/omlx"
 
@@ -36,7 +36,6 @@ brew "bats-core"                # Bash test framework
 ###############################################################################
 # Casks (GUI apps / fonts)
 ###############################################################################
-cask_args appdir: "~/Applications"  # keep GUI apps in your user folder
 cask "ghostty"                      # terminal
 cask "1password"
 cask "1password-cli"

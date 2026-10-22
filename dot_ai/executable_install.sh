@@ -6,7 +6,7 @@ AI_HOME="${AI_HOME:-$HOME/.ai}"
 if command -v brew >/dev/null 2>&1; then
 	BREW_BIN="$(command -v brew)"
 else
-	BREW_BIN="${HOMEBREW_PREFIX:-$HOME/.homebrew}/bin/brew"
+	BREW_BIN="${HOMEBREW_PREFIX:-/opt/homebrew}/bin/brew"
 fi
 
 require_cmd() {
