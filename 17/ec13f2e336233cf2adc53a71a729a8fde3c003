@@ -1,0 +1,26 @@
+README.md
+  s_9ab2dc8a95e6ca::t_986bd62b08861a 169-174
+run_once_30_install_other.sh.tmpl
+  s_9ab2dc8a95e6ca::t_d1a84901202dd8 18
+  s_9ab2dc8a95e6ca::t_5dc76bab9d069c 2,4-8,10-15,19-22,24-25
+run_once_40_install_setup_asdf.sh.tmpl
+  s_9ab2dc8a95e6ca::t_99f4bf308151c0 82-91
+Brewfile
+  s_9ab2dc8a95e6ca::t_78b1f49e4bcf5a 31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "17ec13f2e336233cf2adc53a71a729a8fde3c003",
+  "prompts": {},
+  "sessions": {
+    "s_9ab2dc8a95e6ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb9cc6b0-8b11-4a95-b24a-ab6f85343e71",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Tjalve Aarflot <tjalve.github@proton.me>"
+    }
+  }
+}
