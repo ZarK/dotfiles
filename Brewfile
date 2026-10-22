@@ -1,7 +1,6 @@
 ###############################################################################
 # Formulae (CLI tools installed into /opt/homebrew/bin)
 ###############################################################################
-tap "jundot/omlx", "https://github.com/jundot/omlx"
 
 brew "asdf"                     # runtime version manager
 brew "starship"                 # prompt
@@ -16,7 +15,6 @@ brew "python@3.12"              # Python 3.12
 brew "git"                      # git CLI tools
 brew "chezmoi"                  # dot-file manager (self-host)
 brew "uv"                       # package manager for Python
-brew "omlx"                     # local MLX inference server
 brew "fontconfig"               # font configuration library for better font management
 brew "mas"                      # Mac App Store CLI
 brew "tmux"                     # terminal multiplexer
@@ -77,7 +75,5 @@ mas "Slack", id: 803453959
 mas "Keynote", id: 409183694
 mas "Numbers", id: 409203825
 mas "Pages", id: 409201541
-mas "Infuse", id: 1136220934
-mas "CleanMyMac", id: 1339170533
 mas "Commander One", id: 1035236694
 mas "Coffee Time", id: 6743958600
