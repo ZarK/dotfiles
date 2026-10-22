@@ -77,24 +77,18 @@ After a successful login, `gh` is authorized to act on your behalf on GitHub (vi
 
 Next, set up SSH access for Git operations.
 
-**Generate a new SSH key** (if you don't have one on this machine). Use an Ed25519 key for security:
+**Generate a new SSH key** (if you don't have one on this machine). The `-C` comment is just a label, so user@machine works fine — this runs as-is, nothing to fill in:
 
   ```shell
-  ssh-keygen -t ed25519 -C "{email}"
+  ssh-keygen -t ed25519 -C "$(whoami)@$(scutil --get ComputerName | tr ' ' '_')"
   # Hit Enter to accept the default file path (~/.ssh/id_ed25519). Choose a passphrase (or leave empty for no passphrase) and confirm.
   ```
 
 **Add the SSH key to GitHub**. First, ensure GitHub CLI has the required scopes, then upload your public key:
 
   ```shell
-  # Refresh GitHub auth with required scopes
   gh auth refresh -h github.com -s admin:public_key
-
-  # Add SSH key with sanitized title
-  USER=$(whoami)
-  HOST=$(scutil --get ComputerName | tr -d "''\"" | tr ' ' '_')
-  TITLE="$USER@$HOST"
-  gh ssh-key add ~/.ssh/id_ed25519.pub --title "$TITLE"
+  gh ssh-key add ~/.ssh/id_ed25519.pub --title "$(whoami)@$(scutil --get ComputerName | tr ' ' '_')"
   ```
 
 This command uses your logged-in GitHub CLI session to add the key to your GitHub account. If prompted for additional scopes or confirmation, follow along. After this, GitHub will trust logins from your Mac via that SSH key.
