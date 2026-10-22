@@ -1,0 +1,21 @@
+Brewfile
+  s_9ab2dc8a95e6ca::t_0e0409b82a8b61 26-34,40-41,47-48,50-51,54-55,61,71-78
+README.md
+  s_9ab2dc8a95e6ca::t_a874272e345d40 3,5,7,9,12,15,17-21,36,40,62,142-163,165,171,175,180-185,189,191-192,197-198
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8de9dd969c30ba5b4a3ac96601bdeade01eefcd8",
+  "prompts": {},
+  "sessions": {
+    "s_9ab2dc8a95e6ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb9cc6b0-8b11-4a95-b24a-ab6f85343e71",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Tjalve Aarflot <tjalve.github@proton.me>"
+    }
+  }
+}
