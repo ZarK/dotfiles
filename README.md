@@ -19,6 +19,12 @@ Get an AI helper before anything else is set up. The native installer needs noth
 curl -fsSL https://claude.ai/install.sh | bash
 ```
 
+The installer puts the binary in `~/.local/bin`, which a fresh Mac doesn't have on PATH yet — add it for this session (your dotfiles make it permanent later):
+
+```sh
+export PATH="$HOME/.local/bin:$PATH"
+```
+
 Then start it and sign in with your Claude account (opens a browser; credentials from 1Password):
 
 ```sh
