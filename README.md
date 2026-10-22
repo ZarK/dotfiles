@@ -137,6 +137,14 @@ Two one-time restores bring back everything that doesn't belong in a public repo
 
 **Shell secrets** (API keys in `~/.zshrc.local`) come from 1Password. This is the only time 1Password is involved — after this, your shell just sources the plain file:
 
+The restore script uses the `op` CLI (installed by the Brewfile), which must first be connected to the 1Password app: open **1Password → Settings → Developer** and enable **"Integrate with 1Password CLI"**, then verify it answers:
+
+```shell
+op whoami
+```
+
+Then restore:
+
 ```shell
 restore-shell-secrets
 ```
