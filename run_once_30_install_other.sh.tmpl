@@ -1,29 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# 1. Install Bun (official method, not via Homebrew)
-if ! command -v bun &>/dev/null; then
-  echo "Installing Bun (JavaScript runtime) via official script..."
-  curl -fsSL https://bun.sh/install | bash
-else
-  echo "Bun is already installed."
-fi
+OPENCLAW_VERSION="${OPENCLAW_VERSION:-2026.5.7}"
 
 export BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-# 2. Install OpenClaw CLI (prefer Bun, fall back to npm)
+# Install OpenClaw CLI at a reviewed version. This script does not install Bun
+# automatically because remote shell installers need separate review.
 if command -v bun &>/dev/null; then
   if ! command -v openclaw &>/dev/null; then
     echo "Installing OpenClaw CLI via Bun..."
-    bun add --global openclaw@latest
+    bun add --global "openclaw@${OPENCLAW_VERSION}" --ignore-scripts
   else
     echo "OpenClaw CLI is already installed."
   fi
 elif command -v npm &>/dev/null; then
   if ! command -v openclaw &>/dev/null; then
     echo "Installing OpenClaw CLI via npm fallback..."
-    npm install -g openclaw@latest
+    npm install -g "openclaw@${OPENCLAW_VERSION}" --ignore-scripts
   else
     echo "OpenClaw CLI is already installed."
   fi

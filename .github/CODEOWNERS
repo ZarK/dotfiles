@@ -1,0 +1,9 @@
+* @ZarK
+
+.github/workflows/ @ZarK
+.github/CODEOWNERS @ZarK
+Brewfile @ZarK
+dot_ai/ @ZarK
+run_once_*.sh @ZarK
+run_once_*.sh.tmpl @ZarK
+.agents/ @ZarK

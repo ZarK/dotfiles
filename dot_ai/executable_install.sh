@@ -2,6 +2,7 @@
 set -euo pipefail
 
 AI_HOME="${AI_HOME:-$HOME/.ai}"
+OPENCLAW_VERSION="${OPENCLAW_VERSION:-2026.5.7}"
 
 if command -v brew >/dev/null 2>&1; then
 	BREW_BIN="$(command -v brew)"
@@ -39,10 +40,10 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 if ! command -v openclaw >/dev/null 2>&1; then
 	if command -v bun >/dev/null 2>&1; then
-		bun add --global openclaw@latest
+		bun add --global "openclaw@${OPENCLAW_VERSION}" --ignore-scripts
 	else
 		require_cmd npm
-		npm install -g openclaw@latest
+		npm install -g "openclaw@${OPENCLAW_VERSION}" --ignore-scripts
 	fi
 fi
 
