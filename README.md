@@ -77,18 +77,47 @@ After a successful login, `gh` is authorized to act on your behalf on GitHub (vi
 
 Next, set up SSH access for Git operations.
 
-**Generate a new SSH key** (if you don't have one on this machine). The `-C` comment is just a label, so user@machine works fine — this runs as-is, nothing to fill in:
+Each command below runs as-is and can be checked before moving on.
+
+**a) Build a label for the key** (the `-C` comment is only a label; Mac names can contain spaces and curly apostrophes, so sanitize, with a hostname fallback):
 
   ```shell
-  ssh-keygen -t ed25519 -C "$(whoami)@$(scutil --get ComputerName | tr ' ' '_')"
-  # Hit Enter to accept the default file path (~/.ssh/id_ed25519). Choose a passphrase (or leave empty for no passphrase) and confirm.
+  COMPUTER="$(scutil --get ComputerName 2>/dev/null || hostname)"
+  KEY_LABEL="$(whoami)@$(printf '%s' "$COMPUTER" | tr -c '[:alnum:]._-' '_')"
+  echo "$KEY_LABEL"
   ```
 
-**Add the SSH key to GitHub**. First, ensure GitHub CLI has the required scopes, then upload your public key:
+The echo should print something like `you@Your_MacBook_Pro`.
+
+**b) Generate the key** (skips itself if one already exists):
+
+  ```shell
+  ls ~/.ssh/id_ed25519.pub 2>/dev/null || ssh-keygen -t ed25519 -C "$KEY_LABEL"
+  # Hit Enter to accept the default path; choose a passphrase or leave empty.
+  ```
+
+**c) Verify the key exists:**
+
+  ```shell
+  ssh-keygen -l -f ~/.ssh/id_ed25519.pub
+  ```
+
+**d) Give `gh` the key-management scope** (without it, the upload 404s):
 
   ```shell
   gh auth refresh -h github.com -s admin:public_key
-  gh ssh-key add ~/.ssh/id_ed25519.pub --title "$(whoami)@$(scutil --get ComputerName | tr ' ' '_')"
+  ```
+
+**e) Upload the public key:**
+
+  ```shell
+  gh ssh-key add ~/.ssh/id_ed25519.pub --title "$KEY_LABEL"
+  ```
+
+**f) Verify it's on GitHub:**
+
+  ```shell
+  gh ssh-key list
   ```
 
 This command uses your logged-in GitHub CLI session to add the key to your GitHub account. If prompted for additional scopes or confirmation, follow along. After this, GitHub will trust logins from your Mac via that SSH key.
