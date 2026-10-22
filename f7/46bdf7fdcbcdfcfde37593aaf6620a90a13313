@@ -1,0 +1,53 @@
+dot_local/bin/executable_save-shell-secrets
+  s_9ab2dc8a95e6ca::t_795487ef8ca0c0 1-25
+Brewfile
+  e62c3b3bbc5964bd 36
+dot_zshrc
+  e62c3b3bbc5964bd 76
+  s_9ab2dc8a95e6ca::t_02304fcc0242bb 30,33-34,101-130
+dot_local/bin/executable_restore-shell-secrets
+  s_9ab2dc8a95e6ca::t_1e9a785fcf9e50 1-20
+.chezmoiignore
+  s_9ab2dc8a95e6ca::t_047238a8b358a2 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f746bdf7fdcbcdfcfde37593aaf6620a90a13313",
+  "prompts": {
+    "a1991a1621b446c4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_25aa199d8ffer88FVlvq4Ip29T",
+        "model": "openai/gpt-5.4"
+      },
+      "human_author": "Tjalve Aarflot <tjalve.github@proton.me>",
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 199,
+      "overriden_lines": 0
+    },
+    "e62c3b3bbc5964bd": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_25a9fb51bffe9PN0nqjnpyy1nD",
+        "model": "openai/gpt-5.4"
+      },
+      "human_author": "Tjalve Aarflot",
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 43,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_9ab2dc8a95e6ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb9cc6b0-8b11-4a95-b24a-ab6f85343e71",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Tjalve Aarflot <tjalve.github@proton.me>"
+    }
+  }
+}
