@@ -1,0 +1,21 @@
+dot_local/bin/executable_save-shell-secrets
+  s_9ab2dc8a95e6ca::t_03aba318364dff 19-27,30,33-36
+dot_local/bin/executable_restore-shell-secrets
+  s_9ab2dc8a95e6ca::t_ec1b08ff3c12b6 15,19-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "84b212b1b041d494a75020b450ee07c62031e852",
+  "prompts": {},
+  "sessions": {
+    "s_9ab2dc8a95e6ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb9cc6b0-8b11-4a95-b24a-ab6f85343e71",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Tjalve Aarflot <tjalve.github@proton.me>"
+    }
+  }
+}
