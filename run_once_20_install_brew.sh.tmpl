@@ -3,12 +3,28 @@ set -euo pipefail
 
 # Use the standard Homebrew install (setup in README)
 BREW_BIN="/opt/homebrew/bin/brew"
+BREWFILE="{{ .chezmoi.sourceDir }}/Brewfile"
 
-# 1. Install everything declared in the Brewfile
-"$BREW_BIN" bundle --file="{{ .chezmoi.sourceDir }}/Brewfile"
+# Pass 1: taps, formulae and casks — these must succeed.
+# Mac App Store entries are excluded here because mas fails whenever
+# App Store.app is not signed in or an app was never "purchased" on
+# this Apple ID, and that must not abort the whole chezmoi apply.
+NOMAS_BREWFILE="$(mktemp)"
+trap 'rm -f "$NOMAS_BREWFILE"' EXIT
+grep -v '^mas ' "$BREWFILE" > "$NOMAS_BREWFILE"
+"$BREW_BIN" bundle --file="$NOMAS_BREWFILE"
 
-# 2. Run the optional post-install script for fzf (adds key-bindings & completions)
-# Only run if fzf key bindings aren't already set up in zshrc
+# Pass 2: the full Brewfile including mas — best effort.
+# Already-installed entries are no-ops; only the mas installs are new.
+if ! "$BREW_BIN" bundle --file="$BREWFILE"; then
+  echo ""
+  echo "WARNING: some Mac App Store installs failed (sign-in or purchase missing)."
+  echo "Sign in to App Store.app, then rerun:"
+  echo "  brew bundle --file=\"$BREWFILE\""
+  echo "Continuing with the rest of the setup."
+fi
+
+# fzf post-install (adds key-bindings & completions) if not already configured
 if "$BREW_BIN" --prefix fzf &>/dev/null; then
   if ! grep -q "fzf/shell/key-bindings.zsh" ~/.zshrc 2>/dev/null; then
     echo "Setting up fzf key bindings and completions..."
@@ -17,5 +33,3 @@ if "$BREW_BIN" --prefix fzf &>/dev/null; then
     echo "fzf key bindings already configured in ~/.zshrc"
   fi
 fi
-
-# 3. Done – future package changes happen via 'brew bundle dump' + commit
