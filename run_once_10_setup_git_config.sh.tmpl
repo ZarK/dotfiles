@@ -36,4 +36,16 @@ echo "  Email: $USER_EMAIL"
 git config --global user.name "$USER_NAME"
 git config --global user.email "$USER_EMAIL"
 
+# Sign commits with the SSH key from README step 6 (protected branches require signed commits)
+SIGNING_KEY="$HOME/.ssh/id_ed25519.pub"
+if [ -f "$SIGNING_KEY" ]; then
+    echo "Configuring SSH commit signing with $SIGNING_KEY"
+    git config --global gpg.format ssh
+    git config --global user.signingkey "$SIGNING_KEY"
+    git config --global commit.gpgsign true
+    git config --global tag.gpgsign true
+else
+    echo "Warning: $SIGNING_KEY not found; commits will not be signed. Create it (README step 6) and rerun chezmoi apply."
+fi
+
 echo "Git configuration completed successfully!"
