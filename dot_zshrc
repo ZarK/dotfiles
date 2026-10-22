@@ -26,8 +26,8 @@ alias tailscale='/Applications/Tailscale.app/Contents/MacOS/Tailscale'
 alias edit='RETURN_DIR=$(pwd) && nano ~/.zshrc && cd "$RETURN_DIR" && source ~/.zshrc'
 
 # Developer Tools
-alias code="/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code"
-alias orb="/Applications/OrbStack.app/Contents/MacOS/orb"
+alias code='"/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"'
+alias orb='"/Applications/OrbStack.app/Contents/MacOS/orb"'
 
 # Browsers
 alias vivaldi='open -a Vivaldi'
