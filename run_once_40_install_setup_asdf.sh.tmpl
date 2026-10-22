@@ -1,72 +1,99 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -uo pipefail
 
-# Ensure asdf is available
-if ! command -v asdf &>/dev/null; then
-  echo "asdf not found in PATH. Please install asdf before running this script."
-  exit 1
+# Installs asdf plugins and current runtimes. This script NEVER exits
+# nonzero: a failed install must not abort chezmoi apply. Failures are
+# collected and reported at the end with how to retry.
+# Versions are derived dynamically — nothing hardcoded to go stale.
+
+FAILED=""
+note_fail() {
+  FAILED="$FAILED $1"
+  echo "WARNING: $1 failed - continuing."
+}
+
+if ! command -v asdf >/dev/null 2>&1; then
+  echo "WARNING: asdf not found on PATH - skipping runtime setup."
+  echo "Install it (brew install asdf), then rerun this script:"
+  echo "  bash {{ .chezmoi.sourceDir }}/run_once_40_install_setup_asdf.sh.tmpl"
+  exit 0
 fi
 
-# Ensure asdf plugins for python, nodejs, and dotnet are installed
-asdf plugin add python || true
-asdf plugin add nodejs || true
-asdf plugin add dotnet || true
-
-# Install latest patch versions of Python 3.11, 3.12, 3.13
-for minor in 3.11 3.12 3.13; do
-  latest=$(asdf list all python | grep "^$minor" | grep -E '^[0-9.]+$' | tail -1)
-  if [ -n "$latest" ]; then
-    asdf install python "$latest"
-  fi
+for plugin in python nodejs dotnet rust golang; do
+  asdf plugin add "$plugin" >/dev/null 2>&1 || true
 done
 
-# Find the latest version of each of the two most recent Node.js LTS lines and install them
-LTS_VERSIONS=$(curl -s https://nodejs.org/dist/index.tab \
+# Python: latest patch release of the three newest 3.x minor lines
+PY_ALL="$(asdf list all python 2>/dev/null | grep -E '^3\.[0-9]+\.[0-9]+$' || true)"
+if [ -n "$PY_ALL" ]; then
+  for minor in $(printf '%s\n' "$PY_ALL" | awk -F. '{print $1"."$2}' | sort -t. -k2,2n | uniq | tail -3); do
+    latest="$(printf '%s\n' "$PY_ALL" | grep -E "^${minor}\.[0-9]+$" | sort -t. -k3,3n | tail -1)"
+    if [ -n "$latest" ]; then
+      echo "Installing Python $latest"
+      asdf install python "$latest" || note_fail "python-$latest"
+    fi
+  done
+else
+  note_fail "python-version-discovery"
+fi
+
+# Node.js: latest release of the two most recent LTS lines
+NODE_LTS="$(curl -fsS --max-time 30 https://nodejs.org/dist/index.tab 2>/dev/null \
   | awk 'NR>1 && $10 != "-" && $10 != "" {print $10, $1}' \
   | sort -k1,1 -k2,2V \
   | awk '{versions[$1]=$2} END {for (k in versions) print versions[k]}' \
   | sed 's/^v//' \
   | sort -V \
-  | tail -2)
-for version in $LTS_VERSIONS; do
-  asdf install nodejs "$version"
-done
+  | tail -2 || true)"
+if [ -n "$NODE_LTS" ]; then
+  for version in $NODE_LTS; do
+    echo "Installing Node.js $version"
+    asdf install nodejs "$version" || note_fail "nodejs-$version"
+  done
+else
+  note_fail "nodejs-lts-discovery"
+fi
 
-# Install the latest patch versions of the two most recent .NET LTS major versions
-# (.NET LTS versions are even-numbered major versions: 6, 8, 10, etc.)
-asdf list all dotnet | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | awk -F. '{print $1}' | sort -n | uniq | awk '$1 % 2 == 0' | tail -2 | while read -r major; do
-  latest=$(asdf list all dotnet | grep -E "^${major}\.[0-9]+\.[0-9]+$" | tail -1)
+# .NET: latest patch of the two most recent LTS majors (even-numbered)
+DOTNET_ALL="$(asdf list all dotnet 2>/dev/null | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' || true)"
+if [ -n "$DOTNET_ALL" ]; then
+  for major in $(printf '%s\n' "$DOTNET_ALL" | awk -F. '{print $1}' | sort -n | uniq | awk '$1 % 2 == 0' | tail -2); do
+    latest="$(printf '%s\n' "$DOTNET_ALL" | grep -E "^${major}\.[0-9]+\.[0-9]+$" | sort -V | tail -1)"
+    if [ -n "$latest" ]; then
+      echo "Installing .NET $latest"
+      asdf install dotnet "$latest" || note_fail "dotnet-$latest"
+    fi
+  done
+else
+  note_fail "dotnet-version-discovery"
+fi
+
+# Rust and Go: latest stable release
+for tool in rust golang; do
+  latest="$(asdf list all "$tool" 2>/dev/null | grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)?$' | sort -V | tail -1 || true)"
   if [ -n "$latest" ]; then
-    echo "Installing .NET $latest"
-    asdf install dotnet "$latest"
+    echo "Installing $tool $latest"
+    asdf install "$tool" "$latest" || note_fail "$tool-$latest"
+  else
+    note_fail "$tool-version-discovery"
   fi
 done
 
-# Reshim all tools to ensure shims are properly created
-asdf reshim python
-asdf reshim nodejs
-asdf reshim dotnet
+# Set global versions to the newest installed of each, then reshim
+for tool in python nodejs dotnet rust golang; do
+  newest="$(asdf list "$tool" 2>/dev/null | sed -e 's/^[[:space:]]*//' -e 's/^\*//' | sort -V | tail -1)"
+  if [ -n "$newest" ]; then
+    echo "Setting global $tool -> $newest"
+    asdf set "$tool" "$newest" || note_fail "set-global-$tool"
+  fi
+done
+asdf reshim || true
 
-# Set global versions (use latest Python, Node.js, and .NET)
-latest_python=$(asdf list python | sed 's/^[[:space:]]*//' | sed 's/^\*//' | sort -V | tail -1)
-latest_nodejs=$(asdf list nodejs | sed 's/^[[:space:]]*//' | sed 's/^\*//' | sort -V | tail -1)
-latest_dotnet=$(asdf list dotnet | sed 's/^[[:space:]]*//' | sed 's/^\*//' | sort -V | tail -1)
-
-# Set global versions without asterisks
-if [ -n "$latest_python" ]; then
-  echo "Set global Python version to: $latest_python"
-  asdf set python "$latest_python"
+echo ""
+if [ -n "$FAILED" ]; then
+  echo "WARNING: some runtime installs failed:$FAILED"
+  echo "Retry later with, e.g.:  asdf install python <version>"
+else
+  echo "asdf runtimes installed and globals set."
 fi
-if [ -n "$latest_nodejs" ]; then
-  echo "Set global Node.js version to: $latest_nodejs"
-  asdf set nodejs "$latest_nodejs"
-fi
-if [ -n "$latest_dotnet" ]; then
-  echo "Set global .NET version to: $latest_dotnet"
-  asdf set dotnet "$latest_dotnet"
-fi
-
-# Final reshim to ensure all shims are up-to-date with global versions
-asdf reshim
-
-# Done
+exit 0
