@@ -79,8 +79,16 @@ for tool in rust golang; do
   fi
 done
 
-# Set global versions to the newest installed of each, then reshim
-for tool in python nodejs dotnet rust golang; do
+# Set global versions, then reshim.
+# Python global pins the SECOND-newest installed minor: a weeks-old x.y.0
+# still misses wheels (torch etc.); projects opt into the newest via uv or
+# their own .tool-versions. Everything else gets the newest installed.
+py_global="$(asdf list python 2>/dev/null | sed -e 's/^[[:space:]]*//' -e 's/^\*//' | sort -V | awk -F. '{minors[$1"."$2]=$0} END {for (m in minors) print minors[m]}' | sort -V | tail -2 | head -1)"
+if [ -n "$py_global" ]; then
+  echo "Setting global python -> $py_global (second-newest minor; newest is installed for opt-in)"
+  asdf set python "$py_global" || note_fail "set-global-python"
+fi
+for tool in nodejs dotnet rust golang; do
   newest="$(asdf list "$tool" 2>/dev/null | sed -e 's/^[[:space:]]*//' -e 's/^\*//' | sort -V | tail -1)"
   if [ -n "$newest" ]; then
     echo "Setting global $tool -> $newest"
