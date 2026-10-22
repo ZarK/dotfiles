@@ -90,11 +90,10 @@ Each command below runs as-is and can be checked before moving on.
 
 The echo should print something like `you@macbook-pro-m5-max`.
 
-**b) Generate the key** (skips itself if one already exists):
+**b) Generate the key** (skips itself if one already exists). It prompts interactively: hit Enter to accept the default path, then choose a passphrase or leave it empty — don't paste anything else while it's asking:
 
   ```shell
   ls ~/.ssh/id_ed25519.pub 2>/dev/null || ssh-keygen -t ed25519 -C "$KEY_LABEL"
-  # Hit Enter to accept the default path; choose a passphrase or leave empty.
   ```
 
 **c) Verify the key exists:**
