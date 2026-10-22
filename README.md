@@ -79,15 +79,16 @@ Next, set up SSH access for Git operations.
 
 Each command below runs as-is and can be checked before moving on.
 
-**a) Build a label for the key** (the `-C` comment is only a label; Mac names can contain spaces and curly apostrophes, so sanitize, with a hostname fallback):
+**a) Build a label for the key** (the `-C` comment is only a label; the hardware model beats the user-chosen Mac name, which can contain spaces and curly apostrophes — falls back to a sanitized hostname if `system_profiler` returns nothing):
 
   ```shell
-  COMPUTER="$(scutil --get ComputerName 2>/dev/null || hostname)"
-  KEY_LABEL="$(whoami)@$(printf '%s' "$COMPUTER" | tr -c '[:alnum:]._-' '_')"
+  MODEL="$(system_profiler SPHardwareDataType 2>/dev/null | awk -F': ' '/Model Name|Chip/{printf "%s ", $2}')"
+  [ -n "$MODEL" ] || MODEL="$(scutil --get ComputerName 2>/dev/null || hostname)"
+  KEY_LABEL="$(whoami)@$(printf '%s' "$MODEL" | tr '[:upper:]' '[:lower:]' | tr -cs '[:alnum:]' '-' | sed -e 's/^-//' -e 's/-$//' -e 's/apple-//')"
   echo "$KEY_LABEL"
   ```
 
-The echo should print something like `you@Your_MacBook_Pro`.
+The echo should print something like `you@macbook-pro-m5-max`.
 
 **b) Generate the key** (skips itself if one already exists):
 
