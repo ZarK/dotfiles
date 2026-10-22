@@ -1,0 +1,7 @@
+# Local Executor and Quality runtime files.
+.qube/aie/reviews/
+.qube/aie/gates/
+.qube/aie/runs/
+.qube/aie/config.local.json
+.qube/aiq/out/
+.qube/aiq/progress.json
