@@ -1,0 +1,19 @@
+README.md
+  s_9ab2dc8a95e6ca::t_9452b1a5c40c38 80-99,102,105,109-120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3006d772263ad08456b5121fe63febaa68f07f22",
+  "prompts": {},
+  "sessions": {
+    "s_9ab2dc8a95e6ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb9cc6b0-8b11-4a95-b24a-ab6f85343e71",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Tjalve Aarflot <tjalve.github@proton.me>"
+    }
+  }
+}
