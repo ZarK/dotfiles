@@ -1,0 +1,4 @@
+# ~/.config/ghostty/config — managed by chezmoi
+# Ghostty bundles JetBrains Mono + Nerd Font symbols; this picks the Brewfile font instead.
+font-family = Hack Nerd Font Mono
+font-size = 13
