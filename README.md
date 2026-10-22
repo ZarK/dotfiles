@@ -1,20 +1,24 @@
 # Bootstrapping Your macOS Setup with Chezmoi Dotfiles
 
-This guide helps you  set up a new Mac from scratch using Homebrew and Chezmoi-managed dotfiles. Follow the steps in order.
+This guide helps you set up a new Mac from scratch using Homebrew and Chezmoi-managed dotfiles. Follow the steps in order.
 
-*(Begin in the default Terminal for Step 1, then switch to Warp for all subsequent steps.)*
+*(Everything runs in the default Terminal until the Brewfile installs Ghostty in step 10 — switch to Ghostty after that.)*
 
-## 1. Install Warp Terminal
+## 1. Install Claude Code (your AI setup assistant)
 
-Install **Warp**, a modern Terminal app for macOS, using the official installation script. Run the following command in the default Terminal (not Warp):
+Get an AI helper before anything else. The native installer needs nothing but curl — no Homebrew, no Node:
 
 ```sh
-curl https://warp.dev/install.sh | bash
+curl -fsSL https://claude.ai/install.sh | bash
 ```
 
-For more details, visit [https://warp.dev](https://warp.dev).
+Then start it and sign in with your Claude account (opens a browser):
 
-Once Warp is installed, launch it and perform the rest of the setup in Warp.
+```sh
+claude
+```
+
+From here on you can paste this README at Claude Code and let it drive the rest of the setup, or ask it for help whenever a step misbehaves.
 
 ## 2. Install 1Password (Early Setup)
 
@@ -28,15 +32,12 @@ mkdir -p ~/Applications
 1. **Install 1Password** from the Mac App Store (search for "1Password")
 2. **Move 1Password** from `/Applications` to `~/Applications` (drag and drop in Finder)
 3. **Launch 1Password** from `~/Applications` and sign in to your account
-4. **Use 1Password to sign in to Warp** when prompted (for seamless credential management)
 
-This early setup ensures you have secure credential management available throughout the bootstrap process.
+This early setup ensures you have secure credential management available throughout the bootstrap process. You'll need it in step 11 to restore your shell secrets.
 
 ## 3. Install Homebrew in `~/.homebrew` (Local User Install)
 
-With Warp open, install Homebrew locally (to avoid any system-wide changes).
-
-> This setup is also available as a Warp Workflow with the alias `init-homebrew`. You can run it instantly in Warp by searching for or typing `init-homebrew`. Alternatively, run the commands below manually:
+Install Homebrew locally (to avoid any system-wide changes):
 
 ```shell
 cd ~
@@ -58,7 +59,7 @@ xcode-select --install
 
 ## 5. Install GitHub CLI (`gh`)
 
-Now use Homebrew to install the GitHub CLI tool. In Warp, run:
+Now use Homebrew to install the GitHub CLI tool:
 
 ```shell
 ~/.homebrew/bin/brew install gh
@@ -85,8 +86,6 @@ After a successful login, `gh` is authorized to act on your behalf on GitHub (vi
 ## 7. Generate and Add an SSH Key
 
 Next, set up SSH access for Git operations.
-
-> You can run these steps instantly as Warp Workflows with the aliases `init-ssh-key` (for key generation) and `init-github-key` (for GitHub upload). Both workflows prompt for your email and automatically generate a descriptive, sanitized key title.
 
 **Generate a new SSH key** (if you don't have one on this machine). Use an Ed25519 key for security:
 
@@ -128,8 +127,6 @@ Open the **Mac App Store** app and sign in with your Apple ID before running `ch
 
 ## 10. Pull and Apply Dotfiles with Chezmoi (via SSH)
 
-> You can run this step instantly as a Warp Workflow with the alias `init-chezmoi`, or run the following command manually in Warp:
-
 ```shell
 chezmoi init --apply git@github.com:ZarK/dotfiles.git
 ```
@@ -142,36 +139,62 @@ This command tells chezmoi to **clone your dotfiles repo over SSH** (using the `
 
   *You don't need to manually run `brew bundle` - the Chezmoi init/apply process did it via that script.* If you ever update your Brewfile, rerunning chezmoi apply or the script will install any new items.
 
-## 11. Refresh Font Cache (for Nerd Fonts)
+This step installs **Ghostty**, your terminal — switch to it for the rest of your session.
 
-If your Brewfile included any Nerd Fonts (commonly used for development setups), macOS might not show the new fonts immediately. To ensure they appear in your apps and in Warp, refresh the macOS font cache:
+## 11. Restore Secrets and Agent Memory
+
+Two one-time restores bring back everything that doesn't belong in a public repo:
+
+**Shell secrets** (API keys in `~/.zshrc.local`) come from 1Password. This is the only time 1Password is involved — after this, your shell just sources the plain file:
+
+```shell
+restore-shell-secrets
+```
+
+**Agent memory** (Claude Code per-project memory, Codex memories, agent policy files) comes from the private `agent-memory` repo:
+
+```shell
+gh repo clone ZarK/agent-memory ~/Github/agent-memory
+~/Github/agent-memory/restore.sh
+```
+
+Skills and commands come with the `agent-skills` repo — clone that too if it isn't already in place.
+
+## 12. Refresh Font Cache (for Nerd Fonts)
+
+If your Brewfile included any Nerd Fonts (commonly used for development setups), macOS might not show the new fonts immediately. To ensure they appear in your apps, refresh the macOS font cache:
 
 ```shell
 fc-cache -f -v
 ```
 
-You can now select the Nerd Fonts in Warp settings.
+You can now select the Nerd Fonts in Ghostty's settings (and in Zed).
 
 ---
 
-## 12. Mac App Store Apps
+## 13. Mac App Store Apps
 
 The following Mac App Store apps are attempted during the `brew bundle` step (provided you completed step 9):
 
 - **Tailscale** (1475387142): VPN and network mesh tool
-- **Gifski** (1351639930): GIF converter and animator
-- **Screens 5** (1663047912): VNC/remote desktop client
-- **CoffeeTime -Anti Sleep App** (6743958600): prevent sleep utility
+- **Slack** (803453959): team chat
+- **Keynote** (409183694), **Numbers** (409203825), **Pages** (409201541): Apple iWork suite
+- **Infuse** (1136220934): video player
+- **CleanMyMac** (1339170533): system maintenance
+- **Commander One** (1035236694): dual-pane file manager
+- **Coffee Time** (6743958600): prevent sleep utility
 
 These apps are handled by the `mas` command line tool during the `brew bundle` step. On current macOS versions, `mas account` is not a reliable health check, and installs may still require you to be signed in to App Store.app and to rerun `brew bundle --file ~/.local/share/chezmoi/Brewfile` afterward.
 
-That’s it! 🎉 When your Mac comes back up, you should have your full development environment ready to go:
+That's it! 🎉 When your Mac comes back up, you should have your full development environment ready to go:
 
-* Warp is installed as your Terminal.
+* Claude Code is installed and helped you get here.
+* Ghostty is installed as your terminal.
 * Homebrew (in `~/.homebrew`) is managing all your packages locally.
 * Your GitHub CLI is authenticated, and your SSH key is set up for Git operations.
 * All your dotfiles are in place (shell config, settings, etc., courtesy of Chezmoi).
 * All apps and tools from your Brewfile are installed.
-* Your Nerd Fonts are registered and ready to use (remember to select them in Warp or your IDE, if needed).
+* Your shell secrets and agent memory are restored.
+* Your Nerd Fonts are registered and ready to use (select them in Ghostty or your IDE, if needed).
 
 Now you can start using your machine with your customized setup. Enjoy your fully bootstrapped environment!
