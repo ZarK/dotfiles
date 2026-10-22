@@ -1,0 +1,20 @@
+Brewfile
+  s_9ab2dc8a95e6ca::t_1217c54205ef5b 58-59
+  s_9ab2dc8a95e6ca::t_d87ef51f8454a1 60-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "76845a995e93166610911d51c906417a6fd7e495",
+  "prompts": {},
+  "sessions": {
+    "s_9ab2dc8a95e6ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb9cc6b0-8b11-4a95-b24a-ab6f85343e71",
+        "model": "claude-fable-5"
+      },
+      "human_author": null
+    }
+  }
+}
