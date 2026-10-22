@@ -48,7 +48,6 @@ cask "claude"
 cask "chatgpt"
 cask "obsidian"
 cask "orbstack"
-cask "google-drive"
 cask "displaylink"              # DisplayLink Manager for docked monitors
 cask "vlc"
 cask "keka"
