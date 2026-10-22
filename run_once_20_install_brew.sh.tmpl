@@ -1,35 +1,40 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -uo pipefail
 
-# Use the standard Homebrew install (setup in README)
+# Installs the Brewfile bundle. This script NEVER exits nonzero: a failed
+# entry must not abort chezmoi apply and block the remaining run_once
+# scripts. Failures are reported at the end with the command to fix them.
+# Casks adopt manually pre-installed apps (cask_args adopt in the Brewfile),
+# and Mac App Store installs fail soft when App Store.app isn't ready.
+
 BREW_BIN="/opt/homebrew/bin/brew"
 BREWFILE="{{ .chezmoi.sourceDir }}/Brewfile"
 
-# Pass 1: taps, formulae and casks — these must succeed.
-# Mac App Store entries are excluded here because mas fails whenever
-# App Store.app is not signed in or an app was never "purchased" on
-# this Apple ID, and that must not abort the whole chezmoi apply.
-NOMAS_BREWFILE="$(mktemp)"
-trap 'rm -f "$NOMAS_BREWFILE"' EXIT
-grep -v '^mas ' "$BREWFILE" > "$NOMAS_BREWFILE"
-"$BREW_BIN" bundle --file="$NOMAS_BREWFILE"
-
-# Pass 2: the full Brewfile including mas — best effort.
-# Already-installed entries are no-ops; only the mas installs are new.
-if ! "$BREW_BIN" bundle --file="$BREWFILE"; then
-  echo ""
-  echo "WARNING: some Mac App Store installs failed (sign-in or purchase missing)."
-  echo "Sign in to App Store.app, then rerun:"
-  echo "  brew bundle --file=\"$BREWFILE\""
-  echo "Continuing with the rest of the setup."
+if [ ! -x "$BREW_BIN" ]; then
+  echo "WARNING: Homebrew not found at $BREW_BIN - skipping bundle install."
+  echo "Install Homebrew (README step 3), then run: brew bundle --file=\"$BREWFILE\""
+  exit 0
 fi
 
-# fzf post-install (adds key-bindings & completions) if not already configured
-if "$BREW_BIN" --prefix fzf &>/dev/null; then
+echo "Installing Brewfile bundle (individual failures are reported, never fatal)..."
+"$BREW_BIN" bundle --file="$BREWFILE" || true
+
+echo ""
+if "$BREW_BIN" bundle check --file="$BREWFILE" >/dev/null 2>&1; then
+  echo "Brewfile: everything installed."
+else
+  echo "WARNING: some Brewfile entries are still missing:"
+  "$BREW_BIN" bundle check --verbose --file="$BREWFILE" 2>&1 | grep -iE 'missing|not installed|→' || true
+  echo "Fix whatever blocks them (App Store sign-in, network), then rerun:"
+  echo "  brew bundle --file=\"$BREWFILE\""
+fi
+
+# fzf post-install (key-bindings & completions), also best-effort
+if "$BREW_BIN" --prefix fzf >/dev/null 2>&1; then
   if ! grep -q "fzf/shell/key-bindings.zsh" ~/.zshrc 2>/dev/null; then
     echo "Setting up fzf key bindings and completions..."
-    "$( "$BREW_BIN" --prefix fzf )/install" --all --no-bash --no-fish --no-update-rc
-  else
-    echo "fzf key bindings already configured in ~/.zshrc"
+    "$( "$BREW_BIN" --prefix fzf )/install" --all --no-bash --no-fish --no-update-rc || true
   fi
 fi
+
+exit 0

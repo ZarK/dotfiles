@@ -34,6 +34,7 @@ brew "bats-core"                # Bash test framework
 ###############################################################################
 # Casks (GUI apps / fonts)
 ###############################################################################
+cask_args adopt: true               # adopt manually pre-installed apps instead of failing
 cask "ghostty"                      # terminal
 # 1Password app comes from the Mac App Store in README step 1 (before brew exists)
 cask "1password-cli"
