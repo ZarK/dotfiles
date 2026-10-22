@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "policy": {
+    "modelRouting": {
+      "primary": "primary",
+      "catalog": [
+        {
+          "id": "primary",
+          "host": "claude-code",
+          "transport": "host",
+          "costRank": 3,
+          "notes": "Primary host model. Fallback target for every delegated route class."
+        }
+      ],
+      "routes": {
+        "mechanical-implementation": {
+          "preferred": "primary",
+          "fallback": [
+            "primary"
+          ]
+        },
+        "exploration-investigation": {
+          "preferred": "primary",
+          "fallback": [
+            "primary"
+          ]
+        },
+        "independent-review": {
+          "reviewTier": "review"
+        },
+        "synthesis-judgment": {
+          "preferred": "primary",
+          "fallback": [
+            "primary"
+          ]
+        }
+      }
+    },
+    "reviews": {
+      "mode": "isolated",
+      "route": {
+        "tier": "review",
+        "timeoutSeconds": 600,
+        "maxTurns": 8,
+        "host": "grok-build"
+      },
+      "models": {
+        "review": {
+          "grok-build": {
+            "model": "grok-4.7",
+            "effort": null
+          }
+        },
+        "economy": {},
+        "synthesis": {}
+      }
+    }
+  }
+}
