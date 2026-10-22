@@ -95,7 +95,7 @@ esac
 # pnpm end
 
 alias beekeeper="open -a 'Beekeeper Studio'"
-alias tfgui="python3 $HOME/Github/fold-studio/server.py"
+alias fold="python $HOME/Github/fold-studio/server.py"
 codex() { open -a Codex "${1:-.}"; }
 # oMLX: CLI shim path begin
 case ":$PATH:" in
