@@ -1,0 +1,19 @@
+dot_config/ghostty/config
+  s_9ab2dc8a95e6ca::t_5dbe646c1f8b9c 1-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d0b225c978506daabcbcddba02ae01f6fc692875",
+  "prompts": {},
+  "sessions": {
+    "s_9ab2dc8a95e6ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb9cc6b0-8b11-4a95-b24a-ab6f85343e71",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Tjalve Aarflot <tjalve.github@proton.me>"
+    }
+  }
+}
