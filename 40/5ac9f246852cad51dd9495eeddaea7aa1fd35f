@@ -1,0 +1,23 @@
+run_once_40_install_setup_asdf.sh.tmpl
+  s_9ab2dc8a95e6ca::t_8961a86b9ee641 2,4-7,9-13,15-20,23,26-41,47-55,57-69,82,84-90,92-97,99
+  s_9ab2dc8a95e6ca::t_a9e233b6a41b0d 22
+  s_9ab2dc8a95e6ca::t_61e906d7301cd8 71-73,75-78,83
+  s_9ab2dc8a95e6ca::t_2b679da93b831e 21
+  s_9ab2dc8a95e6ca::t_24cf4b8a31f715 70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "405ac9f246852cad51dd9495eeddaea7aa1fd35f",
+  "prompts": {},
+  "sessions": {
+    "s_9ab2dc8a95e6ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "eb9cc6b0-8b11-4a95-b24a-ab6f85343e71",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Tjalve Aarflot <tjalve.github@proton.me>"
+    }
+  }
+}
