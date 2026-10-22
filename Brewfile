@@ -55,6 +55,12 @@ cask "google-drive"
 cask "displaylink"              # DisplayLink Manager for docked monitors
 cask "vlc"
 cask "keka"
+cask "beekeeper-studio"          # SQL editor (beekeeperstudio.io)
+cask "licecap"                   # animated screen capture (cockos.com)
+# Not in Homebrew — install manually from official sources:
+#   Task Manager TMOG (com.tmog.taskmanager)
+#   Grok Bot (com.anysphere.sand — legit: developed inside Cursor/Anysphere,
+#   branded as a Grok product after the xAI acquisition)
 cask "proton-drive"
 cask "proton-mail"
 cask "protonvpn"
