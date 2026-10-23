@@ -143,9 +143,16 @@ brew install chezmoi
 
 This provides the `chezmoi` command, which you will use to pull down your dotfiles and apply them.
 
-## 8. Sign in to Mac App Store
+## 8. Prepare the Mac App Store
 
-Open the **Mac App Store** app and confirm you're signed in with your Apple ID before running `chezmoi init --apply`. This lets Homebrew Bundle attempt the Mac App Store installs in your Brewfile. If they are skipped or fail, rerun `brew bundle --file ~/.local/share/chezmoi/Brewfile` after signing in.
+Do both before running `chezmoi init --apply`:
+
+1. Open the **Mac App Store** app and confirm you're signed in with your Apple ID.
+2. Stop the App Store from asking for authentication on every free app. Open **System Settings → your name → Media & Purchases**:
+   * Turn **Use Touch ID for Purchases** off. While it's on, macOS hides the password options and requires Touch ID for every download.
+   * Set **Free Downloads** (it appears once Touch ID is off) to **Never Require**.
+
+Skip the second item and every App Store app brings up its own authentication dialog during step 9. Being signed in to App Store.app does not prevent them. Turn Touch ID for Purchases back on after step 9 if you want it.
 
 ## 9. Pull and Apply Dotfiles with Chezmoi (via SSH)
 
@@ -210,17 +217,19 @@ You can now select the Nerd Fonts in Ghostty's settings (and in Zed).
 
 ## 12. Mac App Store Apps
 
-The following Mac App Store apps are attempted during the `brew bundle` step (provided you completed step 8):
+`chezmoi apply` installs these one at a time with `mas get` (`run_once_60_setup_mas.sh`), after the Brewfile. It asks for your macOS password once (mas needs root), and gives each app at most 10 minutes so a stuck App Store dialog can't hang the setup:
 
 - **Tailscale** (1475387142): VPN and network mesh tool
 - **Slack** (803453959): team chat
 - **Keynote** (409183694), **Numbers** (409203825), **Pages** (409201541): Apple iWork suite
-- **Infuse** (1136220934): video player
-- **CleanMyMac** (1339170533): system maintenance
 - **Commander One** (1035236694): dual-pane file manager
 - **Coffee Time** (6743958600): prevent sleep utility
 
-These apps are handled by the `mas` command line tool during the `brew bundle` step. On current macOS versions, `mas account` is not a reliable health check, and installs may still require you to be signed in to App Store.app and to rerun `brew bundle --file ~/.local/share/chezmoi/Brewfile` afterward.
+Any app that fails is listed at the end of the run with the command to retry it. To retry them all:
+
+```shell
+bash ~/.local/share/chezmoi/run_once_60_setup_mas.sh
+```
 
 That's it! 🎉 When your Mac comes back up, you should have your full development environment ready to go:
 

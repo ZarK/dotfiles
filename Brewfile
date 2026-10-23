@@ -64,16 +64,7 @@ cask "protonvpn"
 # cask "tailscale"  # Requires system components; installed via mas below
 
 ###############################################################################
-# Mac App Store apps (installed via mas)
+# Mac App Store apps
 ###############################################################################
-# Note: You need to be signed in to the Mac App Store app for these to work
-# Homebrew Bundle attempts these installs during `brew bundle`
-# If they are skipped or fail, sign in to App Store.app and rerun:
-#   brew bundle --file="$HOME/.local/share/chezmoi/Brewfile"
-mas "Tailscale", id: 1475387142
-mas "Slack", id: 803453959
-mas "Keynote", id: 409183694
-mas "Numbers", id: 409203825
-mas "Pages", id: 409201541
-mas "Commander One", id: 1035236694
-mas "Coffee Time", id: 6743958600
+# Not listed here: run_once_60_setup_mas.sh installs them one at a time with
+# `mas get` (brew bundle would try every app twice and can block chezmoi apply).
