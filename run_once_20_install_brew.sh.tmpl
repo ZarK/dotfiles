@@ -4,8 +4,8 @@ set -uo pipefail
 # Installs the Brewfile bundle. This script NEVER exits nonzero: a failed
 # entry must not abort chezmoi apply and block the remaining run_once
 # scripts. Failures are reported at the end with the command to fix them.
-# Casks adopt manually pre-installed apps (cask_args adopt in the Brewfile),
-# and Mac App Store installs fail soft when App Store.app isn't ready.
+# Casks adopt manually pre-installed apps (cask_args adopt in the Brewfile).
+# Mac App Store apps are installed by run_once_60_setup_mas.sh, not here.
 
 BREW_BIN="/opt/homebrew/bin/brew"
 BREWFILE="{{ .chezmoi.sourceDir }}/Brewfile"
@@ -25,7 +25,7 @@ if "$BREW_BIN" bundle check --file="$BREWFILE" >/dev/null 2>&1; then
 else
   echo "WARNING: some Brewfile entries are still missing:"
   "$BREW_BIN" bundle check --verbose --file="$BREWFILE" 2>&1 | grep -iE 'missing|not installed|→' || true
-  echo "Fix whatever blocks them (App Store sign-in, network), then rerun:"
+  echo "Fix whatever blocks them (network, disk space), then rerun:"
   echo "  brew bundle --file=\"$BREWFILE\""
 fi
 
