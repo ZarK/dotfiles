@@ -242,7 +242,7 @@ npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 Add each local server once: start `pi`, run `/localllm`, choose **＋ Add server**, and give it a name and base URL:
 
 - **LLMSnap** on Marvin: `http://192.168.1.201:8008`
-- **TensorFold** on this Mac: `http://127.0.0.1:8080`. Start the model in Fold Studio (`fold`) first so the wizard finds it; after serving a different model, use **↺ Refresh** in `/localllm`.
+- **A server on this Mac**, e.g. `http://127.0.0.1:8080`. Start the model first so the wizard finds it; after the server switches models, use **↺ Refresh** in `/localllm`.
 
 The extension stores servers in `~/.pi/agent/settings.json` and doesn't send the `developer` role or `reasoning_effort` to servers it can't identify, so LLMSnap shouldn't need the `supportsDeveloperRole: false` fix that pi-local needed in `models.json`.
 
