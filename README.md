@@ -231,6 +231,21 @@ Any app that fails is listed at the end of the run with the command to retry it.
 bash ~/.local/share/chezmoi/run_once_60_setup_mas.sh
 ```
 
+## 13. pi and Local Models
+
+`chezmoi apply` installs the [pi](https://pi.dev) coding agent from npm (`run_once_45_install_pi.sh.tmpl`, after asdf provides Node), plus the `pi-localllm-provider` extension, pinned to 0.6.0. pi lives under the global asdf Node, so after switching Node versions, reinstall it:
+
+```shell
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+```
+
+Add each local server once: start `pi`, run `/localllm`, choose **＋ Add server**, and give it a name and base URL:
+
+- **LLMSnap** on Marvin: `http://192.168.1.201:8008`
+- **TensorFold** on this Mac: `http://127.0.0.1:8080`. Start the model in Fold Studio (`fold`) first so the wizard finds it; after serving a different model, use **↺ Refresh** in `/localllm`.
+
+The extension stores servers in `~/.pi/agent/settings.json` and doesn't send the `developer` role or `reasoning_effort` to servers it can't identify, so LLMSnap shouldn't need the `supportsDeveloperRole: false` fix that pi-local needed in `models.json`.
+
 That's it! 🎉 When your Mac comes back up, you should have your full development environment ready to go:
 
 * 1Password holds the keys, and Claude Code helped you get here.

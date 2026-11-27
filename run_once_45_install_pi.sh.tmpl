@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+# Installs the pi coding agent and its local-server extension. Needs Node,
+# so it runs after the asdf script. Never exits nonzero; failures are
+# reported, not fatal.
+
+# chezmoi may run this before the new .zshrc is sourced
+export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
+
+# Pinned so an extension update is a deliberate choice
+LOCALLLM_PROVIDER="npm:pi-localllm-provider@0.6.0"
+
+if ! command -v npm >/dev/null 2>&1; then
+  echo "WARNING: npm not found (asdf nodejs missing?) - skipping pi."
+  echo "Once Node is installed, rerun:"
+  echo "  bash {{ .chezmoi.sourceDir }}/run_once_45_install_pi.sh.tmpl"
+  exit 0
+fi
+
+if command -v pi >/dev/null 2>&1; then
+  echo "pi is already installed ($(pi --version 2>/dev/null))."
+else
+  # npm, not the curl installer: it installs without prompts. pi needs no
+  # lifecycle scripts. It lives under the global asdf Node, so reinstall
+  # after switching Node versions.
+  echo "Installing pi via npm..."
+  if ! npm install -g --ignore-scripts @earendil-works/pi-coding-agent; then
+    echo "WARNING: pi install failed. Retry later with:"
+    echo "  npm install -g --ignore-scripts @earendil-works/pi-coding-agent"
+    exit 0
+  fi
+  asdf reshim nodejs >/dev/null 2>&1 || true
+fi
+
+echo "Installing $LOCALLLM_PROVIDER..."
+if ! pi install "$LOCALLLM_PROVIDER" </dev/null; then
+  echo "WARNING: extension install failed. Retry later with:"
+  echo "  pi install $LOCALLLM_PROVIDER"
+fi
+
+exit 0
